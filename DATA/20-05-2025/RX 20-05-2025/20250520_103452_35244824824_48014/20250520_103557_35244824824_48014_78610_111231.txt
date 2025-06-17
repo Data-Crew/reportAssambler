@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : MONZON LOPEZ^MATIAS WALTER^^^
+  Access Number           : CLINES
+  Sex                     : O
+  Age                     : 35Y
+  Register Date           : 20/5/2025
+  Register Time           : 10:34:52
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 10:35:57
+  Body Part               : LSPINE
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

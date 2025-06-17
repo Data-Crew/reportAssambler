@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : SA DILVA^DEBORA STEFANIA^^^
+  Access Number           : LX
+  Sex                     : O
+  Age                     : 20Y
+  Register Date           : 20/5/2025
+  Register Time           : 08:47:56
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 08:48:41
+  Body Part               : CHEST
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

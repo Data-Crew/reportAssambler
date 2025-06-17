@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : DIAZDIAZ^RODRIGO DANIEL^^^
+  Access Number           : 
+  Sex                     : O
+  Age                     : 21Y
+  Register Date           : 20/5/2025
+  Register Time           : 09:44:57
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 09:45:43
+  Body Part               : WRIST
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 2408
+  Height                  : 2297
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

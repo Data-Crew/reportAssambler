@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : ARDILES^MALENA BELEN^^^
+  Access Number           : LX
+  Sex                     : O
+  Age                     : 27Y
+  Register Date           : 20/5/2025
+  Register Time           : 09:30:08
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 09:30:38
+  Body Part               : CHEST
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

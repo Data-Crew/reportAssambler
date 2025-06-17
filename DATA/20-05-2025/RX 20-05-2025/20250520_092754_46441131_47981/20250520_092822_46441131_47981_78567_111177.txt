@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : PEREYRA^THIAGO LISANDRO^^^
+  Access Number           : LX
+  Sex                     : O
+  Age                     : 20Y
+  Register Date           : 20/5/2025
+  Register Time           : 09:27:54
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 09:28:22
+  Body Part               : CHEST
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

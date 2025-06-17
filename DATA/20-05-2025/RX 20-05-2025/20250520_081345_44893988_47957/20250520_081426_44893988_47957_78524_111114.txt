@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : BUSTOS^FACUNDO TAIEL^^^
+  Access Number           : CLINES
+  Sex                     : O
+  Age                     : 22Y
+  Register Date           : 20/5/2025
+  Register Time           : 08:13:45
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 08:14:26
+  Body Part               : CHEST
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

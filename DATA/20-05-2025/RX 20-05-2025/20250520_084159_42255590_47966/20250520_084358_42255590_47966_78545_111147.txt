@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : MONZON^EDUARDO GASTON^^^
+  Access Number           : CLINES
+  Sex                     : O
+  Age                     : 28Y
+  Register Date           : 20/5/2025
+  Register Time           : 08:41:59
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 08:43:58
+  Body Part               : CSPINE
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 2104
+  Height                  : 1905
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

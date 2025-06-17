@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : VAZQUEZ^BARBARA PATRICIA^^^
+  Access Number           : SOOFT
+  Sex                     : O
+  Age                     : 32Y
+  Register Date           : 20/5/2025
+  Register Time           : 10:17:10
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 10:17:39
+  Body Part               : CHEST
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

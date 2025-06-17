@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : PEREIRA MEDINA^SERGIO EDUARDO^^^
+  Access Number           : MITRE
+  Sex                     : O
+  Age                     : 26Y
+  Register Date           : 20/5/2025
+  Register Time           : 08:33:12
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 08:34:32
+  Body Part               : LSPINE
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 2873
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos
