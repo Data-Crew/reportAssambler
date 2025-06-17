@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : GARCIA^ALEJANDRO MARTIN^^^
+  Access Number           : T UNION
+  Sex                     : O
+  Age                     : 42Y
+  Register Date           : 20/5/2025
+  Register Time           : 08:44:59
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 08:46:33
+  Body Part               : CSPINE
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 2472
+  Height                  : 2049
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

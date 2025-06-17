@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : PASTRAN^ELISA CARINA^^^
+  Access Number           : JAMM
+  Sex                     : O
+  Age                     : 51Y
+  Register Date           : 20/5/2025
+  Register Time           : 13:48:12
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 13:49:05
+  Body Part               : KNEE
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 2600
+  Height                  : 1985
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

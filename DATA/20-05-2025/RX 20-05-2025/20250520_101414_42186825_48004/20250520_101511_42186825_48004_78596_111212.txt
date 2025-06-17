@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : GUTIERREZ^MAURICIO NAHUEL^^^
+  Access Number           : TOSUD
+  Sex                     : O
+  Age                     : 25Y
+  Register Date           : 20/5/2025
+  Register Time           : 10:14:14
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 10:15:11
+  Body Part               : LSPINE
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

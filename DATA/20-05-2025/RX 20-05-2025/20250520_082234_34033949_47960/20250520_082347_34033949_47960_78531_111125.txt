@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : OBREGONJ^CARLOS DANIEL^^^
+  Access Number           : FIRDT CLEAN
+  Sex                     : O
+  Age                     : 36Y
+  Register Date           : 20/5/2025
+  Register Time           : 08:22:34
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 08:23:47
+  Body Part               : LSPINE
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : CRUZ^ROXANA VALERIA^^^
+  Access Number           : CITO
+  Sex                     : O
+  Age                     : 35Y
+  Register Date           : 20/5/2025
+  Register Time           : 08:20:06
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 08:20:43
+  Body Part               : CHEST
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

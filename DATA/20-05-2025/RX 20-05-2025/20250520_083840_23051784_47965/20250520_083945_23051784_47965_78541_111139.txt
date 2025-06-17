@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : DIAZ^JUAN ANTONIO^^^
+  Access Number           : CLINES
+  Sex                     : O
+  Age                     : 52Y
+  Register Date           : 20/5/2025
+  Register Time           : 08:38:40
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 08:39:45
+  Body Part               : LSPINE
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

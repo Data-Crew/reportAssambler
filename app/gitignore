@@ -1,6 +1,8 @@
 # Carpetas del proyecto a ignorar
-DATA/
-OUTPUT/
+DATA/*
+!DATA/.gitkeep
+OUTPUT/*
+!OUTPUT/.gitkeep    
 
 # Entornos virtuales
 venv/

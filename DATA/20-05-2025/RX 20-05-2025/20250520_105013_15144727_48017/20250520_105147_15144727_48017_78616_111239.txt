@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : SOSA BOY^WILLIAM ARIEL^^^
+  Access Number           : COMA
+  Sex                     : O
+  Age                     : 26Y
+  Register Date           : 20/5/2025
+  Register Time           : 10:50:13
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 10:51:47
+  Body Part               : CSPINE
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 2576
+  Height                  : 1961
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

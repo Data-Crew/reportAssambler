@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : SCONZA^ALAN CHRISTIAN^^^
+  Access Number           : ENERGY GROUP
+  Sex                     : O
+  Age                     : 32Y
+  Register Date           : 20/5/2025
+  Register Time           : 10:25:17
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 10:26:11
+  Body Part               : LSPINE
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 2984
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos

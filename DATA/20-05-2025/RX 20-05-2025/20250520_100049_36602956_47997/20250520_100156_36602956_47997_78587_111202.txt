@@ -1,0 +1,22 @@
+*******Patient Information*******
+  Name                    : DOMINGUEZ^LUCAS HERNAN^^^
+  Access Number           : TELOTEXC
+  Sex                     : O
+  Age                     : 33Y
+  Register Date           : 20/5/2025
+  Register Time           : 10:00:49
+  Exposure Date           : 20/5/2025
+  Exposure Time           : 10:01:56
+  Body Part               : LSPINE
+  Referring Physician     : 
+
+*******Image  Information*******
+  Width                   : 3064
+  Height                  : 3065
+  Alloc Bits              : 16
+  Using Bits              : 14
+
+*******Hospital Information*******
+  Name                    : 
+  Address                 : 
+  PerformPhysician        : Rayos
