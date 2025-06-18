@@ -1,0 +1,1 @@
+Este directorio almacena el informe que compila todos los estudios del paciente indicados en la columna DETALLE de la hoja de ruta guardado en DATA/fecha/fecha/

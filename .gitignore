@@ -1,0 +1,49 @@
+# Carpetas del proyecto a ignorar
+#DATA/*
+#!DATA/.gitkeep
+OUTPUT/*
+!OUTPUT/.gitkeep    
+
+# Archivos temporales o de pruebas
+app/tmp/
+tests/tmp/
+
+# Entornos virtuales
+venv/
+.env/
+.env.bak/
+.venv/
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.so
+*.egg-info/
+dist/
+build/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Archivos de log o temporales
+*.log
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+
+# Pytest cache
+.pytest_cache/
+
+# VSCode/IDE config
+.vscode/
+.idea/
+
+# Docker artifacts 
+*.tar
+*.img
+*.container
+
+# Streamlit cache
+.streamlit/config.toml
+.streamlit/secrets.toml

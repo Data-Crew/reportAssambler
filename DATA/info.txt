@@ -1,0 +1,3 @@
+Guardar en ese directorios los subdirectorios de estudios por fecha
+
+e.g. DATA/20-05-2025/
