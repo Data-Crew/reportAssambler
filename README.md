@@ -30,7 +30,7 @@ Este script:
 En Windows podés ejecutar `start.bat` haciendo doble click sobre el archivo, o abriendo una terminal (desde PowerShell o CMD) y navegando al directorio del proyecto:
 
 
-<pre lang="markdown"> ```cmd start.bat ``` </pre>
+<pre lang="markdown"> ```cmd start.bat``` </pre>
 
 **Requisito:** debes de tener Docker Desktop para Windows instalado y funcionando antes de usar este script.
 Podés descargarlo desde: https://www.docker.com/products/docker-desktop/
