@@ -1,6 +1,6 @@
 # Carpetas del proyecto a ignorar
-#DATA/*
-#!DATA/.gitkeep
+DATA/*
+!DATA/.gitkeep
 OUTPUT/*
 !OUTPUT/.gitkeep    
 
