@@ -1,3 +1,5 @@
-Guardar en ese directorios los subdirectorios de estudios por fecha
+En este directorio se almacenan los subdirectorios de estudios por fecha para la compilación de reportes.
 
-e.g. DATA/20-05-2025/
+e.g. 
+
+DATA/20-05-2025/etc.
