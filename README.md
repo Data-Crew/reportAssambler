@@ -30,10 +30,14 @@ Este script:
 En Windows podés ejecutar `start.bat` haciendo doble click sobre el archivo, o abriendo una terminal (desde PowerShell o CMD) y navegando al directorio del proyecto:
 
 
-<pre lang="markdown"> ```cmd start.bat``` </pre>
+```cmd
+start.bat
+```
 
-**Requisito:** debes de tener Docker Desktop para Windows instalado y funcionando antes de usar este script.
-Podés descargarlo desde: https://www.docker.com/products/docker-desktop/
+> **Requisito:** asegurate de tener **Docker Desktop para Windows** instalado y funcionando antes de usar este script.
+> Podés descargarlo desde: [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
+
+Una vez instalado, Docker debe estar corriendo en segundo plano (verificá que el icono de Docker esté activo en la barra de tareas).
 
 ### 3. Acceder a los entornos dentro del contenedor
 
