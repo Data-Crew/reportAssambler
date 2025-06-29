@@ -8,7 +8,8 @@ TEST_DATE = "20-05-2025"
 #TEST_CONTROL = {"BASICO"}
 #TEST_CONTROL = {"BASICO", "AUDIOMETRIA"}
 #TEST_CONTROL = {"BASICO",  "ALTURA"}
-TEST_CONTROL = {"BASICO",  "ESPIROMETRIA"}
+#TEST_CONTROL = {"BASICO",  "ESPIROMETRIA"}
+TEST_CONTROL = {"BASICO",  "ERGOMETRIA"}
 
 
 # Construye el path absoluto al folder de fecha
@@ -114,6 +115,28 @@ elif set(TEST_CONTROL) == {"BASICO", "ESPIROMETRIA"}:
         mask = (
             assembler.df_master["DETALLE"].notna() &
             assembler.df_master["DETALLE"].str.upper().str.contains("ESPIROMETRIA")
+        )
+        row = assembler.df_master[mask].sample(1).iloc[0]
+        dni = row["DNI"].replace(".", "")
+        apellido = row["APELLIDOS"].strip().replace(" ", "_")
+        index = row.name
+
+        assembler.build_report_for_patient(index)
+
+        output_path = Path(__file__).resolve().parent.parent / "OUTPUT" / TEST_DATE / f"{apellido}_{dni}.pdf"
+        assert output_path.exists()
+
+elif set(TEST_CONTROL) == {"BASICO", "ERGOMETRIA"}:
+    def test_build_report_token_basico_ergometria():
+        assembler = ReportAssembler(str(get_data_path()))
+        print("\n" + "✂️" * 3 + " Separando laboratorios por paciente " + "✂️" * 3 + "\n")
+        assembler.preprocess_study_results_by_dni("LABORATORIO")
+        print("\n" + "✂️" * 3 + " Separando ergometrías por paciente " + "✂️" * 3 + "\n")
+        assembler.preprocess_study_results_by_name("ERGOMETRIA")
+
+        mask = (
+            assembler.df_master["DETALLE"].notna() &
+            assembler.df_master["DETALLE"].str.upper().str.contains("ERGOMETRIA")
         )
         row = assembler.df_master[mask].sample(1).iloc[0]
         dni = row["DNI"].replace(".", "")

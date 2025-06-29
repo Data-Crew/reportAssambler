@@ -43,6 +43,7 @@ class ReportAssembler:
             "AUDIOMETRIA": ["AUDIOMETRIA"],
             "PSICOTECNICO": ["PSICOS"],
             "ESPIROMETRIA": ["ESPIROMETRIA"],
+            "ERGOMETRIA": ["ERGOMETRIA"]
         }
 
     def _index_shared_pdfs(self) -> Dict[str, Path]:
@@ -269,6 +270,27 @@ class ReportAssembler:
                     else:
                         print(f"❌ ESPIROMETRÍA no encontrada con patrones: {patrones}")
 
+                elif study.upper() == "ERGOMETRIA" and apellido and nombre:
+                    ergos_dir = self.fecha_folder / "ERGOMETRIA"
+                    ergos_dir.mkdir(exist_ok=True)
+                    ergos_pdf = self.base_path / f"ERGOMETRIA {self.base_path.name}.pdf"
+
+                    if not list(ergos_dir.glob("*.pdf")) and ergos_pdf.exists():
+                        from app.converters import split_pdf_by_name
+                        print("✂️✂️✂️ Separando ERGOMETRÍAS por paciente ✂️✂️✂️")
+                        split_pdf_by_name(ergos_pdf, ergos_dir)
+
+                    # Buscar PDF individual
+                    full_name = f"{apellido.replace('_', ' ').strip()} {nombre.strip()}".upper()
+                    filename = f"{full_name.replace(' ', '_')}.pdf"
+                    ergos_individual = ergos_dir / filename
+
+                    if ergos_individual.exists():
+                        print(f"🚴 ERGOMETRÍA encontrada: {ergos_individual.name}")
+                        pdfs.append(ergos_individual)
+                    else:
+                        print(f"❌ ERGOMETRÍA no encontrada: {ergos_individual}")
+
                 else:
                     print(f"ℹ️ Estudio {study} no reconocido o faltan datos requeridos (DNI, nombre o apellido)")
 
@@ -306,8 +328,12 @@ class ReportAssembler:
 
     def build_report_for_patient(self, index: int):
         row = self.df_master.iloc[index]
+
         apellido = str(row['APELLIDOS']).strip().replace(" ", "_")
-        dni = str(row['DNI']).strip()
+        nombre = str(row['NOMBRES']).strip().replace(" ", "_").upper()
+        dni = str(row['DNI']).strip().replace(".", "")
+        empresa = str(row.get("EMPRESA", "SIN_EMPRESA")).strip().replace(" ", "_").upper()
+
         tokens = row["DETALLE"].upper().replace(",", "").split("+")
         tokens = [t.strip() for t in tokens]
 
@@ -325,8 +351,9 @@ class ReportAssembler:
         for p in pdf_paths:
             print(f" - {p}")
 
-        dni_clean = dni.replace(".", "")
-        final_pdf_path = output_dir / f"{apellido}_{dni_clean}.pdf"
+        final_name = f"{apellido}_{nombre}_{dni}_{empresa}.pdf"
+        final_pdf_path = output_dir / final_name
+
         merged = fitz.open()
         
         for pdf in pdf_paths:
