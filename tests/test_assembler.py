@@ -48,7 +48,9 @@ if set(TEST_CONTROL) == {"BASICO"}:
 
         assembler.build_report_for_patient(index)
 
-        output_path = Path(__file__).resolve().parent.parent / "OUTPUT" / TEST_DATE / f"{apellido}_{dni}.pdf"
+        nombre = row["NOMBRES"].strip().replace(" ", "_").upper()
+        empresa = str(row.get("EMPRESA", "SIN_EMPRESA")).strip().replace(" ", "_").upper()
+        output_path = Path(__file__).resolve().parent.parent / "OUTPUT" / TEST_DATE / f"{apellido}_{nombre}_{dni}_{empresa}.pdf"
         assert output_path.exists()
 
 
@@ -71,7 +73,9 @@ elif set(TEST_CONTROL) == {"BASICO", "AUDIOMETRIA"}:
 
         assembler.build_report_for_patient(index)
 
-        output_path = Path(__file__).resolve().parent.parent / "OUTPUT" / TEST_DATE / f"{apellido}_{dni}.pdf"
+        nombre = row["NOMBRES"].strip().replace(" ", "_").upper()
+        empresa = str(row.get("EMPRESA", "SIN_EMPRESA")).strip().replace(" ", "_").upper()
+        output_path = Path(__file__).resolve().parent.parent / "OUTPUT" / TEST_DATE / f"{apellido}_{nombre}_{dni}_{empresa}.pdf"
         assert output_path.exists()
 
 
@@ -101,7 +105,9 @@ elif set(TEST_CONTROL) == {"BASICO", "ALTURA"}:
 
         assembler.build_report_for_patient(index)
 
-        output_path = Path(__file__).resolve().parent.parent / "OUTPUT" / TEST_DATE / f"{apellido}_{dni}.pdf"
+        nombre = row["NOMBRES"].strip().replace(" ", "_").upper()
+        empresa = str(row.get("EMPRESA", "SIN_EMPRESA")).strip().replace(" ", "_").upper()
+        output_path = Path(__file__).resolve().parent.parent / "OUTPUT" / TEST_DATE / f"{apellido}_{nombre}_{dni}_{empresa}.pdf"
         assert output_path.exists()
 
 elif set(TEST_CONTROL) == {"BASICO", "ESPIROMETRIA"}:
@@ -123,7 +129,9 @@ elif set(TEST_CONTROL) == {"BASICO", "ESPIROMETRIA"}:
 
         assembler.build_report_for_patient(index)
 
-        output_path = Path(__file__).resolve().parent.parent / "OUTPUT" / TEST_DATE / f"{apellido}_{dni}.pdf"
+        nombre = row["NOMBRES"].strip().replace(" ", "_").upper()
+        empresa = str(row.get("EMPRESA", "SIN_EMPRESA")).strip().replace(" ", "_").upper()
+        output_path = Path(__file__).resolve().parent.parent / "OUTPUT" / TEST_DATE / f"{apellido}_{nombre}_{dni}_{empresa}.pdf"
         assert output_path.exists()
 
 elif set(TEST_CONTROL) == {"BASICO", "ERGOMETRIA"}:
@@ -132,7 +140,7 @@ elif set(TEST_CONTROL) == {"BASICO", "ERGOMETRIA"}:
         print("\n" + "✂️" * 3 + " Separando laboratorios por paciente " + "✂️" * 3 + "\n")
         assembler.preprocess_study_results_by_dni("LABORATORIO")
         print("\n" + "✂️" * 3 + " Separando ergometrías por paciente " + "✂️" * 3 + "\n")
-        assembler.preprocess_study_results_by_name("ERGOMETRIA")
+        assembler.preprocess_study_results_by_dni("ERGOMETRIA")
 
         mask = (
             assembler.df_master["DETALLE"].notna() &
@@ -145,7 +153,9 @@ elif set(TEST_CONTROL) == {"BASICO", "ERGOMETRIA"}:
 
         assembler.build_report_for_patient(index)
 
-        output_path = Path(__file__).resolve().parent.parent / "OUTPUT" / TEST_DATE / f"{apellido}_{dni}.pdf"
+        nombre = row["NOMBRES"].strip().replace(" ", "_").upper()
+        empresa = str(row.get("EMPRESA", "SIN_EMPRESA")).strip().replace(" ", "_").upper()
+        output_path = Path(__file__).resolve().parent.parent / "OUTPUT" / TEST_DATE / f"{apellido}_{nombre}_{dni}_{empresa}.pdf"
         assert output_path.exists()
 
 else:

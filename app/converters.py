@@ -27,14 +27,14 @@ def convert_xlsx_to_pdf(xlsx_path: Path, output_pdf_path: Path):
 
 def extract_dni_from_page_text(text: str) -> Optional[str]:
     # Primero intenta encontrar el patrón "(DNI ...)"
-    match = re.search(r"\(\s*[A-Z]?\s*(\d{6,10})\s*\)", text)
+    match = re.search(r"\(\s*[A-Z]?\s*([0-9.]{6,15})\s*\)", text)
     if match:
-        return match.group(1)
+        return match.group(1).replace('.', '')
     
-    # Luego intenta encontrar "DNI 36602956"
-    match_alt = re.search(r"DNI[\s:]*([0-9]{6,10})", text)
+    # Luego intenta encontrar "DNI 36602956" o "DNI 29.432.074"
+    match_alt = re.search(r"DNI[\s:]*([0-9.]{6,15})", text)
     if match_alt:
-        return match_alt.group(1)
+        return match_alt.group(1).replace('.', '')
 
     return None
 

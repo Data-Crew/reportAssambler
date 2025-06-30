@@ -270,20 +270,19 @@ class ReportAssembler:
                     else:
                         print(f"❌ ESPIROMETRÍA no encontrada con patrones: {patrones}")
 
-                elif study.upper() == "ERGOMETRIA" and apellido and nombre:
+                elif study.upper() == "ERGOMETRIA" and dni:
                     ergos_dir = self.fecha_folder / "ERGOMETRIA"
                     ergos_dir.mkdir(exist_ok=True)
                     ergos_pdf = self.base_path / f"ERGOMETRIA {self.base_path.name}.pdf"
 
                     if not list(ergos_dir.glob("*.pdf")) and ergos_pdf.exists():
-                        from app.converters import split_pdf_by_name
-                        print("✂️✂️✂️ Separando ERGOMETRÍAS por paciente ✂️✂️✂️")
-                        split_pdf_by_name(ergos_pdf, ergos_dir)
+                        from app.converters import split_pdf_by_dni
+                        print("✂️✂️✂️ Separando ERGOMETRÍAS por DNI ✂️✂️✂️")
+                        split_pdf_by_dni(ergos_pdf, ergos_dir)
 
-                    # Buscar PDF individual
-                    full_name = f"{apellido.replace('_', ' ').strip()} {nombre.strip()}".upper()
-                    filename = f"{full_name.replace(' ', '_')}.pdf"
-                    ergos_individual = ergos_dir / filename
+                    # Buscar PDF individual por DNI
+                    dni_clean = dni.replace(".", "")
+                    ergos_individual = ergos_dir / f"{dni_clean}.pdf"
 
                     if ergos_individual.exists():
                         print(f"🚴 ERGOMETRÍA encontrada: {ergos_individual.name}")
