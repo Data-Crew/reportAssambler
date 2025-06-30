@@ -107,7 +107,7 @@ with col5:
 logs = ""
 
 if discriminar_clicked:
-    studies_by_dni = ["LABORATORIO", "AUDIOMETRIA"]
+    studies_by_dni = ["LABORATORIO", "AUDIOMETRIA", "ERGOMETRIA"]
     studies_by_name = ["EEG", "PSICOS", "ESPIROMETRIA"]
 
     buffer = io.StringIO()
