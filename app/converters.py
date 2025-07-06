@@ -13,7 +13,7 @@ def convert_xlsx_to_pdf(xlsx_path: Path, output_pdf_path: Path):
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
         cmd = [
-            "libreoffice", "--headless", "--convert-to", "pdf",
+            "libreoffice-arg", "--headless", "--convert-to", "pdf",
             "--outdir", str(tmpdir_path), str(xlsx_path)
         ]
         subprocess.run(cmd, check=True)
