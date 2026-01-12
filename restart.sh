@@ -39,7 +39,7 @@ if ! docker container inspect "$CONTAINER_NAME" > /dev/null 2>&1; then
     docker run -it --name "$CONTAINER_NAME" \
         -v "$(pwd):/app" \
         -p 8501:8501 \
-        -p 8888:8888 \
+        -p 8889:8888 \
         "$IMAGE_NAME"
     exit 0
 fi

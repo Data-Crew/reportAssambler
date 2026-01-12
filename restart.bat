@@ -33,7 +33,7 @@ IF ERRORLEVEL 1 (
     docker run -it --name %CONTAINER_NAME% ^
         -v "%cd%:/app" ^
         -p 8501:8501 ^
-        -p 8888:8888 ^
+        -p 8889:8888 ^
         %IMAGE_NAME%
     goto :eof
 )

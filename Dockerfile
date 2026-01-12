@@ -30,9 +30,14 @@ RUN pip install -r requirements.txt jupyterlab streamlit
 
 COPY . .
 
+# Copiar y hacer ejecutable el script de inicio
+COPY start_app.sh /usr/local/bin/start_app.sh
+RUN chmod +x /usr/local/bin/start_app.sh
+
 ENV PYTHONPATH=/app
 
 EXPOSE 8501 8888
 
-CMD ["bash"]
+# Ejecutar el script de inicio por defecto
+CMD ["/usr/local/bin/start_app.sh"]
 
