@@ -1,0 +1,123 @@
+{
+  "GLUCOSA": {
+    "min": 70.0,
+    "max": 100.0,
+    "unidad": "mg/dL",
+    "sinonimos": ["GLUCEMIA", "GLUC"]
+  },
+  "HEMOGLOBINA": {
+    "min": 12.0,
+    "max": 16.0,
+    "unidad": "g/dL",
+    "sinonimos": ["HB", "HGB"]
+  },
+  "HEMATOCRITO": {
+    "min": 36.0,
+    "max": 48.0,
+    "unidad": "%",
+    "sinonimos": ["HTO", "HCT"]
+  },
+  "COLESTEROL_TOTAL": {
+    "min": 0.0,
+    "max": 200.0,
+    "unidad": "mg/dL",
+    "sinonimos": ["COLESTEROL", "COL"]
+  },
+  "TRIGLICERIDOS": {
+    "min": 0.0,
+    "max": 150.0,
+    "unidad": "mg/dL",
+    "sinonimos": ["TG", "TRIG"]
+  },
+  "COLESTEROL_LDL": {
+    "min": 0.0,
+    "max": 100.0,
+    "unidad": "mg/dL",
+    "sinonimos": ["LDL", "COLESTEROL LDL"]
+  },
+  "COLESTEROL_HDL": {
+    "min": 40.0,
+    "max": 100.0,
+    "unidad": "mg/dL",
+    "sinonimos": ["HDL", "COLESTEROL HDL"]
+  },
+  "UREA": {
+    "min": 15.0,
+    "max": 50.0,
+    "unidad": "mg/dL",
+    "sinonimos": ["UREA NITROGENO"]
+  },
+  "CREATININA": {
+    "min": 0.6,
+    "max": 1.2,
+    "unidad": "mg/dL",
+    "sinonimos": ["CREAT"]
+  },
+  "ACIDO_URICO": {
+    "min": 3.5,
+    "max": 7.2,
+    "unidad": "mg/dL",
+    "sinonimos": ["URICO", "ACIDO URICO"]
+  },
+  "PROTEINAS_TOTALES": {
+    "min": 6.0,
+    "max": 8.3,
+    "unidad": "g/dL",
+    "sinonimos": ["PROTEINAS", "PROT TOTALES"]
+  },
+  "ALBUMINA": {
+    "min": 3.5,
+    "max": 5.0,
+    "unidad": "g/dL",
+    "sinonimos": ["ALB"]
+  },
+  "BILIRRUBINA_TOTAL": {
+    "min": 0.2,
+    "max": 1.2,
+    "unidad": "mg/dL",
+    "sinonimos": ["BILIRRUBINA", "BIL TOTAL"]
+  },
+  "TGO": {
+    "min": 5.0,
+    "max": 40.0,
+    "unidad": "U/L",
+    "sinonimos": ["AST", "ASPARTATO AMINOTRANSFERASA"]
+  },
+  "TGP": {
+    "min": 5.0,
+    "max": 40.0,
+    "unidad": "U/L",
+    "sinonimos": ["ALT", "ALANINA AMINOTRANSFERASA"]
+  },
+  "FOSFATASA_ALCALINA": {
+    "min": 40.0,
+    "max": 130.0,
+    "unidad": "U/L",
+    "sinonimos": ["FAL", "FOSFATASA"]
+  },
+  "GAMMA_GT": {
+    "min": 8.0,
+    "max": 61.0,
+    "unidad": "U/L",
+    "sinonimos": ["GGT", "GAMMA GLUTAMIL TRANSFERASA"]
+  },
+  "HEMOGLOBINA_GLICOSILADA": {
+    "min": 4.0,
+    "max": 5.7,
+    "unidad": "%",
+    "sinonimos": ["HBA1C", "HEMOGLOBINA GLICOSILADA"]
+  },
+  "TSH": {
+    "min": 0.4,
+    "max": 4.0,
+    "unidad": "mUI/L",
+    "sinonimos": ["TSH", "TIROTROPINA"]
+  },
+  "T4_LIBRE": {
+    "min": 0.8,
+    "max": 1.8,
+    "unidad": "ng/dL",
+    "sinonimos": ["T4L", "TIROXINA LIBRE"]
+  }
+}
+

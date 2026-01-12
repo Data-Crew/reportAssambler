@@ -210,8 +210,83 @@ class ReportAssembler:
                     if eeg_individual.exists():
                         print(f"🧠 EEG encontrado: {eeg_individual.name}")
                         pdfs.append(eeg_individual)
+
+                    # Buscar imágenes de EEG en carpeta "EEG DD-MM-YYYY"
+                    eeg_images_root = self.base_path / f"EEG {self.base_path.name}"
+                    matching_images = []
+                    
+                    if eeg_images_root.exists() and eeg_images_root.is_dir():
+                        # Normalizar nombres para búsqueda (similar a ECG)
+                        apellido_orig = apellido.replace("_", " ")
+                        primer_apellido = apellido_orig.strip().split()[0].upper()
+                        primer_nombre = nombre.strip().split()[0].upper()
+                        
+                        apellido_clean = primer_apellido.replace(" ", "_")
+                        nombre_clean = primer_nombre.replace(" ", "_")
+                        
+                        # Buscar imágenes con diferentes patrones
+                        image_patterns = [
+                            f"{apellido_clean}_{nombre_clean}*",
+                            f"{apellido.strip().upper().replace(' ', '_')}_{nombre_clean}*",
+                            f"{full_name.replace(' ', '_')}*"
+                        ]
+                        
+                        for pattern in image_patterns:
+                            # Buscar JPG y PNG (case insensitive)
+                            for ext in ['jpg', 'jpeg', 'png']:
+                                matches = list(eeg_images_root.glob(f"{pattern}.{ext}"))
+                                matches.extend(list(eeg_images_root.glob(f"{pattern}.{ext.upper()}")))
+                                if matches:
+                                    matching_images.extend(matches)
+                                    break
+                            if matching_images:
+                                break
+                        
+                        if matching_images:
+                            # Ordenar imágenes encontradas y eliminar duplicados
+                            matching_images = sorted(set(matching_images))
+                            
+                            # Convertir imágenes a PDF (similar a RX)
+                            dni_clean = dni.replace(".", "") if dni else "unknown"
+                            eeg_images_pdf_path = Path("tmp") / f"eeg_images_{apellido_clean}_{nombre_clean}_{dni_clean}.pdf"
+                            eeg_images_pdf_path.parent.mkdir(exist_ok=True)
+                            
+                            resized_images = []
+                            for img_path in matching_images:
+                                try:
+                                    img = Image.open(img_path).convert("RGB")
+                                    img = ImageOps.exif_transpose(img)  # Corrige orientación
+                                    
+                                    # Redimensionar preservando aspecto, ancho máximo 1100px (similar a audiometría)
+                                    max_width = 1100
+                                    if img.width > max_width:
+                                        ratio = max_width / float(img.width)
+                                        new_size = (max_width, int(img.height * ratio))
+                                        img = img.resize(new_size, Image.LANCZOS)
+                                    resized_images.append(img)
+                                except Exception as e:
+                                    print(f"⚠️ Error procesando imagen {img_path.name}: {e}")
+                                    continue
+                            
+                            if resized_images:
+                                resized_images[0].save(
+                                    eeg_images_pdf_path,
+                                    save_all=True,
+                                    append_images=resized_images[1:],
+                                    resolution=200,
+                                    quality=95
+                                )
+                                print(f"🧠 Imágenes EEG convertidas a PDF (escalado): {eeg_images_pdf_path} ({len(resized_images)} imágenes)")
+                                pdfs.append(eeg_images_pdf_path)
+                            else:
+                                print(f"⚠️ No se pudieron procesar las imágenes EEG encontradas")
+                        else:
+                            print(f"⚠️ No se encontraron imágenes EEG en {eeg_images_root} para patrones: {image_patterns}")
                     else:
-                        print(f"❌ EEG no encontrado: {eeg_individual}")
+                        print(f"ℹ️ Carpeta de imágenes EEG no encontrada: {eeg_images_root} (esto es normal si no hay imágenes)")
+                    
+                    if not eeg_individual.exists() and not matching_images:
+                        print(f"❌ EEG no encontrado (ni PDF ni imágenes): {eeg_individual}")
 
                 elif study.upper() == "PSICOS" and apellido and nombre:
                     psicos_dir = self.fecha_folder / "PSICOS"
