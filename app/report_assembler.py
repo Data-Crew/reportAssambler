@@ -40,6 +40,7 @@ class ReportAssembler:
         return {
             "BASICO": ["LABORATORIO", "ECG", "RX"],
             "ALTURA": ["EEG", "PSICOS", "AUDIOMETRIA"],
+            "EEG": ["EEG"],  # Token directo para EEG según indicación de Esteban
             "AUDIOMETRIA": ["AUDIOMETRIA"],
             "PSICOTECNICO": ["PSICOS"],
             "ESPIROMETRIA": ["ESPIROMETRIA"],
@@ -202,47 +203,86 @@ class ReportAssembler:
                         print("✂️✂️✂️ Separando EEG por paciente ✂️✂️✂️")
                         split_pdf_by_name(eeg_pdf, eeg_dir)
 
-                    # Buscar PDF individual
+                    # Normalizar nombres para búsqueda (similar a ECG)
+                    apellido_orig = apellido.replace("_", " ")
+                    primer_apellido = apellido_orig.strip().split()[0].upper()
+                    primer_nombre = nombre.strip().split()[0].upper()
                     full_name = f"{apellido.replace('_', ' ').strip()} {nombre.strip()}".upper()
+                    
+                    apellido_clean = primer_apellido.replace(" ", "_")
+                    nombre_clean = primer_nombre.replace(" ", "_")
+                    
+                    # Buscar PDF individual en eeg_dir primero
                     filename = f"{full_name.replace(' ', '_')}.pdf"
                     eeg_individual = eeg_dir / filename
+                    eeg_found = False
 
                     if eeg_individual.exists():
                         print(f"🧠 EEG encontrado: {eeg_individual.name}")
                         pdfs.append(eeg_individual)
+                        eeg_found = True
 
-                    # Buscar imágenes de EEG en carpeta "EEG DD-MM-YYYY"
+                    # Buscar PDFs e imágenes de EEG en carpeta "EEG DD-MM-YYYY"
                     eeg_images_root = self.base_path / f"EEG {self.base_path.name}"
                     matching_images = []
+                    matching_pdfs = []
                     
                     if eeg_images_root.exists() and eeg_images_root.is_dir():
-                        # Normalizar nombres para búsqueda (similar a ECG)
-                        apellido_orig = apellido.replace("_", " ")
-                        primer_apellido = apellido_orig.strip().split()[0].upper()
-                        primer_nombre = nombre.strip().split()[0].upper()
+                        # Patrones de búsqueda para PDFs e imágenes
+                        # Construir variaciones del nombre con espacios y guiones bajos
+                        apellido_space = primer_apellido.replace("_", " ")
+                        nombre_space = primer_nombre.replace("_", " ")
                         
-                        apellido_clean = primer_apellido.replace(" ", "_")
-                        nombre_clean = primer_nombre.replace(" ", "_")
-                        
-                        # Buscar imágenes con diferentes patrones
-                        image_patterns = [
-                            f"{apellido_clean}_{nombre_clean}*",
+                        search_patterns = [
+                            f"{apellido_clean}_{nombre_clean}*",  # VIVAS_CESAR*
+                            f"{apellido_space} {nombre_space}*",  # VIVAS CESAR* (con espacio)
+                            f"{primer_apellido} {primer_nombre}*",  # VIVAS CESAR* (directo)
                             f"{apellido.strip().upper().replace(' ', '_')}_{nombre_clean}*",
-                            f"{full_name.replace(' ', '_')}*"
+                            f"{full_name.replace(' ', '_')}*",  # VIVAS_CESAR_ALEJANDRO*
+                            f"{full_name.replace('_', ' ')}*"  # VIVAS CESAR ALEJANDRO* (con espacios)
                         ]
                         
-                        for pattern in image_patterns:
-                            # Buscar JPG y PNG (case insensitive)
-                            for ext in ['jpg', 'jpeg', 'png']:
-                                matches = list(eeg_images_root.glob(f"{pattern}.{ext}"))
-                                matches.extend(list(eeg_images_root.glob(f"{pattern}.{ext.upper()}")))
-                                if matches:
-                                    matching_images.extend(matches)
-                                    break
-                            if matching_images:
+                        # Buscar PDFs primero - buscar con diferentes variaciones
+                        for pattern in search_patterns:
+                            pdf_matches = list(eeg_images_root.glob(f"{pattern}.pdf"))
+                            if pdf_matches:
+                                matching_pdfs.extend(pdf_matches)
                                 break
                         
-                        if matching_images:
+                        # Si no se encontró con patrones, buscar directamente por nombre parcial
+                        if not matching_pdfs:
+                            # Buscar archivos que empiecen con el apellido y primer nombre
+                            all_pdfs = list(eeg_images_root.glob("*.pdf"))
+                            for pdf_file in all_pdfs:
+                                pdf_name_upper = pdf_file.stem.upper()
+                                # Verificar si el nombre del archivo contiene el apellido y primer nombre
+                                if primer_apellido in pdf_name_upper and primer_nombre in pdf_name_upper:
+                                    matching_pdfs.append(pdf_file)
+                                    break
+                        
+                        # Si no se encontraron PDFs, buscar imágenes
+                        if not matching_pdfs:
+                            for pattern in search_patterns:
+                                # Buscar JPG y PNG (case insensitive)
+                                for ext in ['jpg', 'jpeg', 'png']:
+                                    matches = list(eeg_images_root.glob(f"{pattern}.{ext}"))
+                                    matches.extend(list(eeg_images_root.glob(f"{pattern}.{ext.upper()}")))
+                                    if matches:
+                                        matching_images.extend(matches)
+                                        break
+                                if matching_images:
+                                    break
+                        
+                        # Procesar PDFs encontrados
+                        if matching_pdfs:
+                            matching_pdfs = sorted(set(matching_pdfs))
+                            eeg_pdf_found = matching_pdfs[0]  # Tomar el primero si hay múltiples
+                            print(f"🧠 EEG PDF encontrado en carpeta de imágenes: {eeg_pdf_found.name}")
+                            pdfs.append(eeg_pdf_found)
+                            eeg_found = True
+                        
+                        # Procesar imágenes encontradas (solo si no se encontró PDF)
+                        elif matching_images:
                             # Ordenar imágenes encontradas y eliminar duplicados
                             matching_images = sorted(set(matching_images))
                             
@@ -278,15 +318,16 @@ class ReportAssembler:
                                 )
                                 print(f"🧠 Imágenes EEG convertidas a PDF (escalado): {eeg_images_pdf_path} ({len(resized_images)} imágenes)")
                                 pdfs.append(eeg_images_pdf_path)
+                                eeg_found = True
                             else:
                                 print(f"⚠️ No se pudieron procesar las imágenes EEG encontradas")
                         else:
-                            print(f"⚠️ No se encontraron imágenes EEG en {eeg_images_root} para patrones: {image_patterns}")
+                            print(f"⚠️ No se encontraron PDFs ni imágenes EEG en {eeg_images_root} para patrones: {search_patterns}")
                     else:
                         print(f"ℹ️ Carpeta de imágenes EEG no encontrada: {eeg_images_root} (esto es normal si no hay imágenes)")
                     
-                    if not eeg_individual.exists() and not matching_images:
-                        print(f"❌ EEG no encontrado (ni PDF ni imágenes): {eeg_individual}")
+                    if not eeg_found:
+                        print(f"❌ EEG no encontrado (ni PDF ni imágenes) para {apellido} {nombre}")
 
                 elif study.upper() == "PSICOS" and apellido and nombre:
                     psicos_dir = self.fecha_folder / "PSICOS"

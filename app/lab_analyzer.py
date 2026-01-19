@@ -43,8 +43,16 @@ class LaboratoryAnalyzer:
         with LaboratoryPDFExtractor(pdf_path) as extractor:
             text = extractor.extract_text()
         
+        # Extraer información del paciente (incluyendo sexo)
+        from app.lab_extractor import extract_patient_info
+        patient_info = extract_patient_info(text)
+        sexo_paciente = patient_info.get("sexo")
+        
         # Parsear datos
-        parametros_encontrados = parse_laboratory_data(text)
+        parametros_encontrados = parse_laboratory_data(text, include_patient_info=False)
+        
+        # Guardar el sexo del paciente para usarlo en el análisis de parámetros
+        self._current_patient_sexo = sexo_paciente
         
         # Analizar cada parámetro
         resultados = []
@@ -57,6 +65,9 @@ class LaboratoryAnalyzer:
             if resultado.get("fuera_de_rango"):
                 fuera_de_rango_count += 1
         
+        # Limpiar el atributo temporal
+        delattr(self, '_current_patient_sexo')
+        
         total = len(resultados)
         porcentaje = (fuera_de_rango_count / total * 100) if total > 0 else 0
         
@@ -65,7 +76,8 @@ class LaboratoryAnalyzer:
             "total_parametros": total,
             "fuera_de_rango": fuera_de_rango_count,
             "porcentaje_fuera": round(porcentaje, 2),
-            "resultados": resultados
+            "resultados": resultados,
+            "paciente": patient_info
         }
     
     def _analyze_parameter(self, param_data: Dict) -> Dict:
@@ -84,30 +96,42 @@ class LaboratoryAnalyzer:
         rango_min = param_data.get("rango_min")
         rango_max = param_data.get("rango_max")
         
+        # Verificar si este parámetro debe validarse contra rangos numéricos
+        debe_validar = self.ranges.should_validate_range(parametro)
+        
         # Intentar obtener rango de configuración si no viene en el PDF
         if rango_min is None or rango_max is None:
-            rango_config = self.ranges.get_range(parametro)
+            # Obtener sexo del contexto si está disponible (se pasa desde analyze_pdf)
+            sexo = getattr(self, '_current_patient_sexo', None)
+            rango_config = self.ranges.get_range(parametro, sexo=sexo)
             if rango_config:
                 rango_min, rango_max = rango_config
                 # Si no hay unidad en el PDF, usar la de configuración
                 if not unidad:
                     unidad = self.ranges.get_unidad(parametro) or ""
         
-        # Determinar si está fuera de rango
+        # Determinar si está fuera de rango (solo si debe validarse y hay valores numéricos)
         fuera_de_rango = False
         exceso = None
         deficiencia = None
         direccion = None
         
-        if rango_min is not None and rango_max is not None:
-            if valor < rango_min:
-                fuera_de_rango = True
-                deficiencia = rango_min - valor
-                direccion = "bajo"
-            elif valor > rango_max:
-                fuera_de_rango = True
-                exceso = valor - rango_max
-                direccion = "alto"
+        if debe_validar and rango_min is not None and valor is not None:
+            try:
+                valor_num = float(valor)
+                # Validar contra mínimo (si existe)
+                if valor_num < rango_min:
+                    fuera_de_rango = True
+                    deficiencia = rango_min - valor_num
+                    direccion = "bajo"
+                # Validar contra máximo (si existe)
+                elif rango_max is not None and valor_num > rango_max:
+                    fuera_de_rango = True
+                    exceso = valor_num - rango_max
+                    direccion = "alto"
+            except (ValueError, TypeError):
+                # Si el valor no es numérico y es cualitativo, no marcar como fuera de rango
+                pass
         
         return {
             "parametro": parametro,

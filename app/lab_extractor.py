@@ -74,17 +74,121 @@ class LaboratoryPDFExtractor:
         return tables
 
 
-def parse_laboratory_data(text: str) -> List[Dict]:
+def extract_patient_info(text: str) -> Dict[str, Optional[str]]:
     """
-    Parsea el texto extraído del PDF para encontrar parámetros, valores y rangos.
+    Extrae información del paciente del texto del PDF de laboratorio.
     
     Args:
         text: Texto extraído del PDF
         
     Returns:
-        Lista de diccionarios con información de cada parámetro encontrado
+        Diccionario con información del paciente:
+        {
+            "sexo": "hombre" | "mujer" | None,
+            "nombre": str | None,
+            "dni": str | None
+        }
+    """
+    info = {
+        "sexo": None,
+        "nombre": None,
+        "dni": None
+    }
+    
+    lines = text.split('\n')
+    text_upper = text.upper()
+    
+    # Patrones para detectar sexo
+    # Patrón 1: "SEXO: M" o "SEXO: F" o "SEXO: MASCULINO" o "SEXO: FEMENINO"
+    sexo_patterns = [
+        re.compile(r'SEXO\s*[:]\s*(M|F|MASCULINO|FEMENINO|HOMBRE|MUJER)', re.IGNORECASE),
+        re.compile(r'SEXO\s*[:]\s*(M|F)', re.IGNORECASE),
+        # Patrón 2: En la misma línea que "PACIENTE" o "NOMBRE"
+        re.compile(r'(PACIENTE|NOMBRE).*?SEXO\s*[:]\s*(M|F|MASCULINO|FEMENINO)', re.IGNORECASE),
+        # Patrón 3: "M" o "F" después de "SEXO" en diferentes formatos
+        re.compile(r'SEXO\s+(M|F|MASCULINO|FEMENINO)', re.IGNORECASE),
+    ]
+    
+    for pattern in sexo_patterns:
+        match = pattern.search(text_upper)
+        if match:
+            sexo_str = match.group(1) if len(match.groups()) >= 1 else match.group(2)
+            sexo_upper = sexo_str.upper().strip()
+            
+            if sexo_upper in ['M', 'MASCULINO', 'HOMBRE', 'H']:
+                info["sexo"] = "hombre"
+                break
+            elif sexo_upper in ['F', 'FEMENINO', 'MUJER', 'FEM']:
+                info["sexo"] = "mujer"
+                break
+    
+    # Si no se encontró explícitamente, buscar en líneas comunes donde aparece
+    if info["sexo"] is None:
+        # Buscar en líneas que contienen información del paciente
+        for line in lines[:50]:  # Buscar en las primeras 50 líneas (donde suele estar la info del paciente)
+            line_upper = line.upper()
+            # Buscar patrones como "M" o "F" cerca de palabras clave
+            if re.search(r'\b(SEXO|PACIENTE|NOMBRE|DNI)\b', line_upper):
+                # Buscar M o F en la misma línea
+                if re.search(r'\bM\b', line_upper) and not re.search(r'\b(MUJER|FEMENINO|F)\b', line_upper):
+                    # Verificar que no sea parte de otra palabra
+                    if re.search(r'\b(M|MASCULINO|HOMBRE)\b', line_upper):
+                        info["sexo"] = "hombre"
+                        break
+                elif re.search(r'\b(F|FEMENINO|MUJER)\b', line_upper):
+                    info["sexo"] = "mujer"
+                    break
+    
+    # Extraer DNI si está disponible
+    dni_patterns = [
+        re.compile(r'DNI\s*[:]\s*(\d{7,8})', re.IGNORECASE),
+        re.compile(r'DOCUMENTO\s*[:]\s*(\d{7,8})', re.IGNORECASE),
+        re.compile(r'(\d{7,8})', re.IGNORECASE),  # Cualquier número de 7-8 dígitos cerca de "DNI"
+    ]
+    
+    for pattern in dni_patterns:
+        match = pattern.search(text)
+        if match:
+            info["dni"] = match.group(1)
+            break
+    
+    # Extraer nombre si está disponible
+    nombre_patterns = [
+        re.compile(r'NOMBRE\s*[:]\s*([A-ZÁÉÍÓÚÑ\s]+)', re.IGNORECASE),
+        re.compile(r'PACIENTE\s*[:]\s*([A-ZÁÉÍÓÚÑ\s]+)', re.IGNORECASE),
+    ]
+    
+    for pattern in nombre_patterns:
+        match = pattern.search(text)
+        if match:
+            nombre = match.group(1).strip()
+            # Limpiar nombre (remover información adicional que pueda venir después)
+            nombre = re.split(r'\s+(DNI|SEXO|FECHA)', nombre, flags=re.IGNORECASE)[0]
+            nombre = re.sub(r'\s+', ' ', nombre).strip()
+            if len(nombre) > 3:  # Validar que tiene sentido
+                info["nombre"] = nombre
+                break
+    
+    return info
+
+
+def parse_laboratory_data(text: str, include_patient_info: bool = False) -> List[Dict]:
+    """
+    Parsea el texto extraído del PDF para encontrar parámetros, valores y rangos.
+    
+    Args:
+        text: Texto extraído del PDF
+        include_patient_info: Si es True, incluye información del paciente en el primer resultado
+        
+    Returns:
+        Lista de diccionarios con información de cada parámetro encontrado.
+        Si include_patient_info es True, el primer elemento puede contener información del paciente.
     """
     results = []
+    patient_info = None
+    
+    if include_patient_info:
+        patient_info = extract_patient_info(text)
     lines = text.split('\n')
     
     # Limpiar líneas vacías y muy cortas
@@ -242,6 +346,10 @@ def parse_laboratory_data(text: str) -> List[Dict]:
                     break  # Si encontramos match, pasar a la siguiente línea
                 except (ValueError, TypeError):
                     continue
+    
+    # Si se solicitó información del paciente y se encontró, agregarla al primer resultado
+    if include_patient_info and patient_info and results:
+        results[0]["paciente"] = patient_info
     
     return results
 
