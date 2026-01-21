@@ -5,6 +5,7 @@ OUTPUT/*
 !OUTPUT/.gitkeep    
 
 # Archivos temporales o de pruebas
+tmp/
 app/tmp/
 tests/tmp/
 

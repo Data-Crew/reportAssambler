@@ -1,0 +1,895 @@
+{
+  "version": "1.0",
+  "descripcion": "Configuración completa de parámetros de laboratorio con rangos de referencia para validación con Esteban",
+  "ultima_actualizacion": "2025-01-13",
+  
+  "parametros": {
+    "ERITROCITOS": {
+      "nombre": "ERITROCITOS",
+      "sinonimos": ["ERITROCITO", "GLÓBULOS ROJOS", "RBC"],
+      "unidad": "/mm3",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 4400000,
+          "max": 5900000,
+          "nota": "4,4 a 5,9 mill./mm3"
+        },
+        "mujer": {
+          "min": 4200000,
+          "max": 5200000,
+          "nota": "4,2 a 5,2 mill./mm3"
+        }
+      },
+      "requiere_sexo": true
+    },
+    
+    "LEUCOCITOS": {
+      "nombre": "LEUCOCITOS",
+      "sinonimos": ["LEUCO", "GLÓBULOS BLANCOS", "WBC", "LEUCOCITO"],
+      "unidad": "/mm3",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 0,
+          "max": 10000,
+          "nota": "Hasta 10.000 /mm3"
+        },
+        "mujer": {
+          "min": 0,
+          "max": 10000,
+          "nota": "Hasta 10.000 /mm3"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "HEMOGLOBINA": {
+      "nombre": "HEMOGLOBINA",
+      "sinonimos": ["HB", "HGB", "HEMOGLOB"],
+      "unidad": "gr/dL",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 14.0,
+          "max": 17.0,
+          "nota": "14,0 a 17,0 gr/dL"
+        },
+        "mujer": {
+          "min": 13.0,
+          "max": 15.0,
+          "nota": "13,0 a 15,0 gr/dL"
+        }
+      },
+      "requiere_sexo": true
+    },
+    
+    "HEMATOCRITO": {
+      "nombre": "HEMATOCRITO",
+      "sinonimos": ["HTO", "HCT"],
+      "unidad": "%",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 40,
+          "max": 52,
+          "nota": "40 a 52 %"
+        },
+        "mujer": {
+          "min": 39,
+          "max": 47,
+          "nota": "39 a 47 %"
+        }
+      },
+      "requiere_sexo": true
+    },
+    
+    "VOLUMEN_CORPUSCULAR_MEDIO": {
+      "nombre": "VOLUMEN CORPUSCULAR MEDIO",
+      "sinonimos": ["VCM", "MCV"],
+      "unidad": "um3",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 85,
+          "max": 95,
+          "nota": "85 a 95 um3"
+        },
+        "mujer": {
+          "min": 85,
+          "max": 95,
+          "nota": "85 a 95 um3"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "HEMOGLOBINA_CORPUSCULAR_MEDIA": {
+      "nombre": "HEMOGLOBINA CORPUSCULAR MEDIA",
+      "sinonimos": ["HCM", "MCH"],
+      "unidad": "pg",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 27.1,
+          "max": 33.0,
+          "nota": "27,1 a 33,0 pg"
+        },
+        "mujer": {
+          "min": 27.1,
+          "max": 33.0,
+          "nota": "27,1 a 33,0 pg"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "CONCENTRACION_HEMOGLOBINA_CORPUSCULAR_MEDIA": {
+      "nombre": "CONCENTRACIÓN DE LA HEMOGLOBINA CORPUSCULAR MEDIA",
+      "sinonimos": ["CHCM", "MCHC", "CONC. DE LA HEMOGLOBINA CORPUSCULAR MEDIA"],
+      "unidad": "%",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 28.0,
+          "max": 36.0,
+          "nota": "28,0 a 36,0 %"
+        },
+        "mujer": {
+          "min": 28.0,
+          "max": 36.0,
+          "nota": "28,0 a 36,0 %"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "NEUTROFILOS_EN_CAYADO": {
+      "nombre": "NEUTRÓFILOS EN CAYADO",
+      "sinonimos": ["NEUTROFILOS EN CAYADO", "BANDAS", "CAYADO"],
+      "unidad": "%",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 0,
+          "max": 5,
+          "nota": "Normalmente bajo"
+        },
+        "mujer": {
+          "min": 0,
+          "max": 5,
+          "nota": "Normalmente bajo"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "NEUTROFILOS_SEGMENTADOS": {
+      "nombre": "NEUTRÓFILOS SEGMENTADOS",
+      "sinonimos": ["NEUTROFILOS SEGMENTADOS", "NEUTRÓFILOS SEG", "SEGMENTADOS"],
+      "unidad": "%",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 50,
+          "max": 70,
+          "nota": "Aproximado 50-70%"
+        },
+        "mujer": {
+          "min": 50,
+          "max": 70,
+          "nota": "Aproximado 50-70%"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "EOSINOFILOS": {
+      "nombre": "EOSINÓFILOS",
+      "sinonimos": ["EOSINOFILOS", "EOS"],
+      "unidad": "%",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 1,
+          "max": 4,
+          "nota": "1-4%"
+        },
+        "mujer": {
+          "min": 1,
+          "max": 4,
+          "nota": "1-4%"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "BASOFILOS": {
+      "nombre": "BASÓFILOS",
+      "sinonimos": ["BASOFILOS", "BASO"],
+      "unidad": "%",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 0,
+          "max": 1,
+          "nota": "0-1%"
+        },
+        "mujer": {
+          "min": 0,
+          "max": 1,
+          "nota": "0-1%"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "LINFOCITOS": {
+      "nombre": "LINFOCITOS",
+      "sinonimos": ["LINFOCITOS", "LINF"],
+      "unidad": "%",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 20,
+          "max": 40,
+          "nota": "20-40%"
+        },
+        "mujer": {
+          "min": 20,
+          "max": 40,
+          "nota": "20-40%"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "MONOCITOS": {
+      "nombre": "MONOCITOS",
+      "sinonimos": ["MONOCITOS", "MONO"],
+      "unidad": "%",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": 2,
+          "max": 8,
+          "nota": "2-8%"
+        },
+        "mujer": {
+          "min": 2,
+          "max": 8,
+          "nota": "2-8%"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "ERITROSEDIMENTACION": {
+      "nombre": "ERITROSEDIMENTACIÓN",
+      "sinonimos": ["ERITROSEDIMENTACION", "VSG", "VELOCIDAD SEDIMENTACIÓN", "VELOCIDAD SEDIMENTACION"],
+      "unidad": "mm 1° Hora",
+      "tipo": "hematologia",
+      "rangos": {
+        "hombre": {
+          "min": null,
+          "max": null,
+          "nota": "Varía según edad y sexo - requiere validación"
+        },
+        "mujer": {
+          "min": null,
+          "max": null,
+          "nota": "Varía según edad y sexo - requiere validación"
+        }
+      },
+      "requiere_sexo": false,
+      "validar_rango": false
+    },
+    
+    "GLUCEMIA": {
+      "nombre": "GLUCEMIA",
+      "sinonimos": ["GLUCOSA", "GLUC", "GLUCEMIA"],
+      "unidad": "mg/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 70,
+          "max": 110,
+          "nota": "70 a 110 mg/dL (en ayunas)"
+        },
+        "mujer": {
+          "min": 70,
+          "max": 110,
+          "nota": "70 a 110 mg/dL (en ayunas)"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "UREMIA": {
+      "nombre": "UREMIA",
+      "sinonimos": ["UREA", "UREMIA"],
+      "unidad": "mg/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 15,
+          "max": 50,
+          "nota": "15 a 50 mg/dL"
+        },
+        "mujer": {
+          "min": 15,
+          "max": 50,
+          "nota": "15 a 50 mg/dL"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "COLOR_ORINA": {
+      "nombre": "COLOR",
+      "sinonimos": ["COLOR"],
+      "unidad": "cualitativo",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: Amarillo claro"
+        },
+        "mujer": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: Amarillo claro"
+        }
+      },
+      "requiere_sexo": false,
+      "validar_rango": false,
+      "tipo_valor": "cualitativo"
+    },
+    
+    "ASPECTO_ORINA": {
+      "nombre": "ASPECTO",
+      "sinonimos": ["ASPECTO"],
+      "unidad": "cualitativo",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: Límpido"
+        },
+        "mujer": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: Límpido"
+        }
+      },
+      "requiere_sexo": false,
+      "validar_rango": false,
+      "tipo_valor": "cualitativo"
+    },
+    
+    "DENSIDAD_ORINA": {
+      "nombre": "DENSIDAD",
+      "sinonimos": ["DENSIDAD", "DENS"],
+      "unidad": "sin unidad",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": 1.010,
+          "max": 1.030,
+          "nota": "1.010 a 1.030"
+        },
+        "mujer": {
+          "min": 1.010,
+          "max": 1.030,
+          "nota": "1.010 a 1.030"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "PH_ORINA": {
+      "nombre": "PH",
+      "sinonimos": ["PH"],
+      "unidad": "sin unidad",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": 5.0,
+          "max": 7.0,
+          "nota": "5,0 a 7,0"
+        },
+        "mujer": {
+          "min": 5.0,
+          "max": 7.0,
+          "nota": "5,0 a 7,0"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "PROTEINAS_ORINA": {
+      "nombre": "PROTEÍNAS",
+      "sinonimos": ["PROTEINAS", "PROT"],
+      "unidad": "cualitativo",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: No contiene"
+        },
+        "mujer": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: No contiene"
+        }
+      },
+      "requiere_sexo": false,
+      "validar_rango": false,
+      "tipo_valor": "cualitativo"
+    },
+    
+    "GLUCOSURIA": {
+      "nombre": "GLUCOSURIA",
+      "sinonimos": ["GLUCOSURIA", "GLUCOSA (ORINA)"],
+      "unidad": "cualitativo",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: No contiene o Normal"
+        },
+        "mujer": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: No contiene o Normal"
+        }
+      },
+      "requiere_sexo": false,
+      "validar_rango": false,
+      "tipo_valor": "cualitativo"
+    },
+    
+    "CUERPOS_CETONICOS": {
+      "nombre": "CUERPOS CETÓNICOS",
+      "sinonimos": ["CUERPOS CETONICOS", "CETONAS"],
+      "unidad": "cualitativo",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: No contiene"
+        },
+        "mujer": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: No contiene"
+        }
+      },
+      "requiere_sexo": false,
+      "validar_rango": false,
+      "tipo_valor": "cualitativo"
+    },
+    
+    "HEMOGLOBINA_ORINA": {
+      "nombre": "HEMOGLOBINA",
+      "sinonimos": ["HEMOGLOBINA (ORINA)", "HB (ORINA)", "SANGRE (ORINA)"],
+      "unidad": "cualitativo",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: No contiene"
+        },
+        "mujer": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: No contiene"
+        }
+      },
+      "requiere_sexo": false,
+      "validar_rango": false,
+      "tipo_valor": "cualitativo"
+    },
+    
+    "BILIRRUBINA_ORINA": {
+      "nombre": "BILIRRUBINA",
+      "sinonimos": ["BILIRRUBINA (ORINA)", "BIL (ORINA)"],
+      "unidad": "cualitativo",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: No contiene"
+        },
+        "mujer": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: No contiene"
+        }
+      },
+      "requiere_sexo": false,
+      "validar_rango": false,
+      "tipo_valor": "cualitativo"
+    },
+    
+    "UROBILINOGENO": {
+      "nombre": "UROBILINÓGENO",
+      "sinonimos": ["UROBILINOGENO", "UROB"],
+      "unidad": "cualitativo",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: Normal"
+        },
+        "mujer": {
+          "min": null,
+          "max": null,
+          "nota": "Normal: Normal"
+        }
+      },
+      "requiere_sexo": false,
+      "validar_rango": false,
+      "tipo_valor": "cualitativo"
+    },
+    
+    "CELULAS_EPITELIALES_PLANAS": {
+      "nombre": "CÉLULAS EPITELIALES PLANAS",
+      "sinonimos": ["CELULAS EPITELIALES PLANAS", "CEL EPITELIALES"],
+      "unidad": "/Cpo.",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": 0,
+          "max": 1,
+          "nota": "0-1 /Cpo."
+        },
+        "mujer": {
+          "min": 0,
+          "max": 1,
+          "nota": "0-1 /Cpo."
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "LEUCOCITOS_POR_CAMPO": {
+      "nombre": "LEUCOCITOS POR CAMPO",
+      "sinonimos": ["LEUCOCITOS POR CAMPO", "LEUCO (ORINA)"],
+      "unidad": "/Cpo.",
+      "tipo": "orina",
+      "rangos": {
+        "hombre": {
+          "min": 0,
+          "max": 5,
+          "nota": "0-5 /Cpo."
+        },
+        "mujer": {
+          "min": 0,
+          "max": 5,
+          "nota": "0-5 /Cpo."
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "CREATININA": {
+      "nombre": "CREATININA",
+      "sinonimos": ["CREATININA", "CREAT"],
+      "unidad": "mg/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 0.7,
+          "max": 1.2,
+          "nota": "0,7 a 1,2 mg/dL"
+        },
+        "mujer": {
+          "min": 0.6,
+          "max": 1.1,
+          "nota": "0,6 a 1,1 mg/dL"
+        }
+      },
+      "requiere_sexo": true
+    },
+    
+    "ACIDO_URICO": {
+      "nombre": "ÁCIDO ÚRICO",
+      "sinonimos": ["ACIDO URICO", "URICO", "ACIDO ÚRICO", "ÁCIDO ÚRICO"],
+      "unidad": "mg/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 3.5,
+          "max": 7.2,
+          "nota": "3,5 a 7,2 mg/dL"
+        },
+        "mujer": {
+          "min": 2.6,
+          "max": 6.0,
+          "nota": "2,6 a 6,0 mg/dL"
+        }
+      },
+      "requiere_sexo": true
+    },
+    
+    "COLESTEROL_TOTAL": {
+      "nombre": "COLESTEROL TOTAL",
+      "sinonimos": ["COLESTEROL TOTAL", "COLESTEROL", "COL TOTAL", "COL"],
+      "unidad": "mg/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 0,
+          "max": 200,
+          "nota": "Menor a 200 mg/dL"
+        },
+        "mujer": {
+          "min": 0,
+          "max": 200,
+          "nota": "Menor a 200 mg/dL"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "COLESTEROL_LDL": {
+      "nombre": "COLESTEROL LDL",
+      "sinonimos": ["COLESTEROL LDL", "LDL", "COLESTEROL LDL-C"],
+      "unidad": "mg/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 0,
+          "max": 100,
+          "nota": "Menor a 100 mg/dL (óptimo)"
+        },
+        "mujer": {
+          "min": 0,
+          "max": 100,
+          "nota": "Menor a 100 mg/dL (óptimo)"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "COLESTEROL_HDL": {
+      "nombre": "COLESTEROL HDL",
+      "sinonimos": ["COLESTEROL HDL", "HDL", "COLESTEROL HDL-C"],
+      "unidad": "mg/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 40,
+          "max": null,
+          "nota": "Mayor a 40 mg/dL"
+        },
+        "mujer": {
+          "min": 50,
+          "max": null,
+          "nota": "Mayor a 50 mg/dL"
+        }
+      },
+      "requiere_sexo": true
+    },
+    
+    "TRIGLICERIDOS": {
+      "nombre": "TRIGLICÉRIDOS",
+      "sinonimos": ["TRIGLICERIDOS", "TRIGLICÉRIDOS", "TG", "TRIG"],
+      "unidad": "mg/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 0,
+          "max": 150,
+          "nota": "Menor a 150 mg/dL"
+        },
+        "mujer": {
+          "min": 0,
+          "max": 150,
+          "nota": "Menor a 150 mg/dL"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "TGO": {
+      "nombre": "TGO",
+      "sinonimos": ["TGO", "AST", "ASPARTATO AMINOTRANSFERASA", "TRANSAMINASA GOT"],
+      "unidad": "U/L",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 5,
+          "max": 40,
+          "nota": "5 a 40 U/L"
+        },
+        "mujer": {
+          "min": 5,
+          "max": 40,
+          "nota": "5 a 40 U/L"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "TGP": {
+      "nombre": "TGP",
+      "sinonimos": ["TGP", "ALT", "ALANINA AMINOTRANSFERASA", "TRANSAMINASA GPT"],
+      "unidad": "U/L",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 5,
+          "max": 40,
+          "nota": "5 a 40 U/L"
+        },
+        "mujer": {
+          "min": 5,
+          "max": 40,
+          "nota": "5 a 40 U/L"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "FOSFATASA_ALCALINA": {
+      "nombre": "FOSFATASA ALCALINA",
+      "sinonimos": ["FOSFATASA ALCALINA", "FAL", "FOSFATASA"],
+      "unidad": "U/L",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 40,
+          "max": 130,
+          "nota": "40 a 130 U/L"
+        },
+        "mujer": {
+          "min": 40,
+          "max": 130,
+          "nota": "40 a 130 U/L"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "GAMMA_GT": {
+      "nombre": "GAMMA GT",
+      "sinonimos": ["GAMMA GT", "GGT", "GAMMA GLUTAMIL TRANSFERASA", "GAMMA GLUTAMILTRANSFERASA"],
+      "unidad": "U/L",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 8,
+          "max": 61,
+          "nota": "8 a 61 U/L"
+        },
+        "mujer": {
+          "min": 5,
+          "max": 36,
+          "nota": "5 a 36 U/L"
+        }
+      },
+      "requiere_sexo": true
+    },
+    
+    "BILIRRUBINA_TOTAL": {
+      "nombre": "BILIRRUBINA TOTAL",
+      "sinonimos": ["BILIRRUBINA TOTAL", "BILIRRUBINA", "BIL TOTAL", "BIL"],
+      "unidad": "mg/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 0.2,
+          "max": 1.2,
+          "nota": "0,2 a 1,2 mg/dL"
+        },
+        "mujer": {
+          "min": 0.2,
+          "max": 1.2,
+          "nota": "0,2 a 1,2 mg/dL"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "PROTEINAS_TOTALES": {
+      "nombre": "PROTEÍNAS TOTALES",
+      "sinonimos": ["PROTEINAS TOTALES", "PROTEÍNAS TOTALES", "PROT TOTALES", "PROTEINAS"],
+      "unidad": "g/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 6.0,
+          "max": 8.3,
+          "nota": "6,0 a 8,3 g/dL"
+        },
+        "mujer": {
+          "min": 6.0,
+          "max": 8.3,
+          "nota": "6,0 a 8,3 g/dL"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "ALBUMINA": {
+      "nombre": "ALBÚMINA",
+      "sinonimos": ["ALBUMINA", "ALBÚMINA", "ALB"],
+      "unidad": "g/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 3.5,
+          "max": 5.0,
+          "nota": "3,5 a 5,0 g/dL"
+        },
+        "mujer": {
+          "min": 3.5,
+          "max": 5.0,
+          "nota": "3,5 a 5,0 g/dL"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "TSH": {
+      "nombre": "TSH",
+      "sinonimos": ["TSH", "TIROTROPINA", "HORMONA TIROTROPA"],
+      "unidad": "mUI/L",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 0.4,
+          "max": 4.0,
+          "nota": "0,4 a 4,0 mUI/L"
+        },
+        "mujer": {
+          "min": 0.4,
+          "max": 4.0,
+          "nota": "0,4 a 4,0 mUI/L"
+        }
+      },
+      "requiere_sexo": false
+    },
+    
+    "T4_LIBRE": {
+      "nombre": "T4 LIBRE",
+      "sinonimos": ["T4 LIBRE", "T4L", "TIROXINA LIBRE", "FT4"],
+      "unidad": "ng/dL",
+      "tipo": "bioquimica",
+      "rangos": {
+        "hombre": {
+          "min": 0.8,
+          "max": 1.8,
+          "nota": "0,8 a 1,8 ng/dL"
+        },
+        "mujer": {
+          "min": 0.8,
+          "max": 1.8,
+          "nota": "0,8 a 1,8 ng/dL"
+        }
+      },
+      "requiere_sexo": false
+    }
+  },
+  
+  "notas_validacion": {
+    "parametros_faltantes_posibles": [],
+    "observaciones": [
+      "Algunos parámetros pueden tener rangos que varían según edad (ej: ERITROSEDIMENTACIÓN)",
+      "Los parámetros cualitativos no tienen rangos numéricos pero tienen valores normales esperados",
+      "Algunos parámetros pueden aparecer con diferentes nombres según el laboratorio",
+      "Validar con Esteban si faltan parámetros comunes en los estudios de rutina"
+    ]
+  }
+}
+
