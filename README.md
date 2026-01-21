@@ -32,6 +32,7 @@ Este script:
 * Solo construye la imagen Docker si el contenedor no existe
 * Verifica conflictos de puertos antes de crear/iniciar el contenedor
 * Mapea los puertos necesarios (8501 para Streamlit, 8889 para JupyterLab)
+* Al iniciar el contenedor, automáticamente ejecuta `start_app.sh` (dentro del contenedor) que muestra el menú interactivo
 
 > **Nota:** El puerto de JupyterLab es 8889 (no 8888) para evitar conflictos con otros contenedores.
 
@@ -56,9 +57,25 @@ Este script tiene las mismas funcionalidades que `start.sh`:
 
 Una vez instalado, Docker debe estar corriendo en segundo plano (verificá que el icono de Docker esté activo en la barra de tareas).
 
+#### Reconstruir la Imagen Docker en Windows
+
+Si necesitás reconstruir la imagen Docker desde cero (por ejemplo, después de actualizar el código), usá `rebuild.bat`:
+
+```cmd
+rebuild.bat
+```
+
+Este script automáticamente:
+- ✅ Detiene y elimina el contenedor anterior
+- ✅ Elimina la imagen anterior
+- ✅ Reconstruye la imagen con los últimos cambios
+- ✅ Inicia el contenedor con Streamlit
+
+> **Cuándo usar `rebuild.bat`**: Después de hacer `git pull` para obtener nuevos cambios, o cuando necesitás asegurarte de que la imagen tenga los últimos cambios del código.
+
 #### Reiniciar el Contenedor en Windows
 
-Si necesitás reiniciar el contenedor sin reconstruir la imagen en Windows:
+Si solo necesitás reiniciar el contenedor sin reconstruir la imagen (el código no cambió):
 
 ```cmd
 restart.bat
@@ -70,9 +87,11 @@ O manualmente desde PowerShell o CMD:
 docker restart reportassambler_container
 ```
 
+> **Cuándo usar `restart.bat`**: Cuando el contenedor se detuvo pero no hay cambios en el código, o cuando solo necesitás reiniciar los servicios.
+
 ### 3. Iniciar los servicios
 
-Cuando el contenedor se inicia, verás un menú interactivo. El contenedor puede ejecutar **dos servicios**:
+Cuando el contenedor se inicia (mediante `start.sh` o `start.bat`), automáticamente se ejecuta `start_app.sh` dentro del contenedor, que muestra un menú interactivo. El contenedor puede ejecutar **dos servicios**:
 
 - **Streamlit**: Aplicación web con el Compilador de Informes y el Clasificador de Laboratorios
 - **JupyterLab**: Entorno de desarrollo interactivo para análisis y notebooks
@@ -95,6 +114,8 @@ Este contenedor puede ejecutar dos servicios:
 3) Iniciar ambos servicios (Streamlit + JupyterLab)
 4) Entrar al shell sin iniciar servicios
 ```
+
+**Para elegir una opción**: Simplemente ingresá el número (1, 2, 3 o 4) y presioná Enter.
 
 **Opciones del menú:**
 
@@ -151,9 +172,25 @@ Una vez que accedas a Streamlit, verás un selector de herramientas en el sideba
    - Tabla expandible con todos los parámetros
    - Opción de descargar resultados en CSV
 
+### Reconstruir la Imagen Docker
+
+Si necesitás reconstruir la imagen Docker desde cero (por ejemplo, después de actualizar el código):
+
+**En Linux/Mac:**
+```bash
+./rebuild.sh
+```
+
+**En Windows:**
+```cmd
+rebuild.bat
+```
+
+Estos scripts eliminan el contenedor e imagen anteriores y reconstruyen todo desde cero.
+
 ### Reiniciar el Contenedor
 
-Si necesitás reiniciar el contenedor sin reconstruir la imagen:
+Si solo necesitás reiniciar el contenedor sin reconstruir la imagen (el código no cambió):
 
 **En Linux/Mac:**
 ```bash
@@ -217,10 +254,36 @@ reportAssambler/
 ├── DATA/                         # Datos de entrada (PDFs, Excel)
 ├── OUTPUT/                       # Informes compilados generados
 ├── tests/                        # Tests unitarios
-├── start.sh                      # Script de inicio (Linux/Mac)
-├── start.bat                     # Script de inicio (Windows)
-└── restart.sh                    # Script de reinicio rápido
+├── start.sh                      # Script del host: construye/inicia contenedor (Linux/Mac)
+├── start.bat                     # Script del host: construye/inicia contenedor (Windows)
+├── restart.sh                    # Script del host: reinicia contenedor existente (Linux/Mac)
+├── restart.bat                   # Script del host: reinicia contenedor existente (Windows)
+├── rebuild.sh                    # Script del host: reconstrucción completa (Linux/Mac)
+├── rebuild.bat                   # Script del host: reconstrucción completa (Windows)
+└── start_app.sh                  # Script del contenedor: menú interactivo (ejecuta dentro del contenedor)
 ```
+
+### Arquitectura de Scripts
+
+Los scripts están organizados en dos niveles:
+
+**Scripts del Host :**
+- `start.sh` / `start.bat`: Construyen la imagen Docker (si no existe) y crean/inician el contenedor
+- `restart.sh` / `restart.bat`: Solo reinician un contenedor existente (sin reconstruir la imagen)
+- `rebuild.bat`: Eliminan contenedor e imagen anteriores y reconstruyen todo desde cero
+
+**Script del Contenedor (dentro de Docker):**
+- `start_app.sh`: Se ejecuta automáticamente cuando el contenedor inicia (definido en el `Dockerfile` como `CMD`)
+  - Muestra el menú interactivo
+  - Permite elegir qué servicio iniciar (Streamlit, JupyterLab, ambos, o shell)
+  - No tiene versión `.bat` porque corre dentro del contenedor Linux, independientemente de tu sistema operativo
+
+**Flujo completo:**
+1. Ejecutás `start.sh` o `start.bat` en tu máquina
+2. El script construye/inicia el contenedor Docker
+3. El contenedor ejecuta automáticamente `start_app.sh` (definido en `Dockerfile`)
+4. `start_app.sh` muestra el menú y espera tu elección (ingresás 1, 2, 3 o 4)
+5. Se inicia el servicio correspondiente
 
 ## Configuración de Rangos de Laboratorio
 
@@ -260,7 +323,12 @@ Si recibís un error de puerto ocupado:
 Si el contenedor no inicia correctamente:
 - Verificá que Docker esté corriendo: `docker ps`
 - Remové el contenedor viejo: `docker rm reportassambler_container`
-- Ejecutá `./start.sh` nuevamente
+- Ejecutá `./start.sh` nuevamente (o `rebuild.bat` en Windows para reconstruir desde cero)
+
+### Después de actualizar el código (git pull)
+Si actualizaste el código desde GitHub y necesitás aplicar los cambios:
+- **En Linux/Mac**: Ejecutá `./rebuild.sh` para reconstruir la imagen con los nuevos cambios
+- **En Windows**: Ejecutá `rebuild.bat` para reconstruir la imagen con los nuevos cambios
 
 ### No se encuentran parámetros en el PDF
 Si el clasificador no encuentra parámetros:
