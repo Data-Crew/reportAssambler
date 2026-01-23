@@ -122,15 +122,26 @@ class LaboratoryRanges:
         normalized = normalize_parametro_name(parametro)
         config = None
         
-        # Buscar directamente
-        if normalized in self.ranges:
+        # Buscar directamente por clave
+        if parametro.upper() in self.ranges:
+            config = self.ranges[parametro.upper()]
+        elif normalized in self.ranges:
             config = self.ranges[normalized]
         else:
-            # Buscar en sinónimos
+            # Buscar en sinónimos y nombres
             for key, cfg in self.ranges.items():
+                nombre_cfg = cfg.get("nombre", key)
                 sinonimos = cfg.get("sinonimos", [])
-                if normalized in [normalize_parametro_name(s) for s in sinonimos]:
+                # Comparar con nombre normalizado
+                if normalize_parametro_name(nombre_cfg) == normalized:
                     config = cfg
+                    break
+                # Comparar con sinónimos normalizados
+                for sinonimo in sinonimos:
+                    if normalize_parametro_name(sinonimo) == normalized:
+                        config = cfg
+                        break
+                if config:
                     break
         
         if config is None:
