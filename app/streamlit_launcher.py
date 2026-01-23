@@ -202,21 +202,47 @@ def mostrar_clasificador_laboratorios(assembler: ReportAssembler, df):
                     
                     # Crear DataFrame para mostrar
                     df_resultados = pd.DataFrame(fuera_rango)
+                    
+                    # Formatear valores: numéricos con 2 decimales, strings como están
+                    def formatear_valor_fuera(x):
+                        if isinstance(x, (int, float)):
+                            return f"{x:.2f}"
+                        elif isinstance(x, str):
+                            return x
+                        else:
+                            return str(x)
+                    
+                    # Formatear rangos esperados
+                    def formatear_rango_esperado(row):
+                        min_val = row['rango_min']
+                        max_val = row['rango_max']
+                        if min_val is not None and max_val is not None:
+                            return f"{min_val:.1f} - {max_val:.1f}"
+                        elif min_val is not None:
+                            return f"> {min_val:.1f}"
+                        elif max_val is not None:
+                            return f"< {max_val:.1f}"
+                        else:
+                            return "N/A"
+                    
+                    # Formatear exceso/deficiencia
+                    def formatear_exceso_deficiencia(row):
+                        if row['exceso'] is not None:
+                            return f"{row['exceso']:.2f}"
+                        elif row['deficiencia'] is not None:
+                            return f"{row['deficiencia']:.2f}"
+                        else:
+                            return ""
+                    
                     df_display = pd.DataFrame({
                         "Parámetro": df_resultados["parametro"],
-                        "Valor": df_resultados["valor"].apply(lambda x: f"{x:.2f}"),
+                        "Valor": df_resultados["valor"].apply(formatear_valor_fuera),
                         "Unidad": df_resultados["unidad"],
-                        "Rango Esperado": df_resultados.apply(
-                            lambda row: f"{row['rango_min']:.1f} - {row['rango_max']:.1f}" 
-                            if row['rango_min'] and row['rango_max'] else "N/A", axis=1
-                        ),
+                        "Rango Esperado": df_resultados.apply(formatear_rango_esperado, axis=1),
                         "Dirección": df_resultados["direccion"].apply(
                             lambda x: "⬆️ Alto" if x == "alto" else "⬇️ Bajo" if x == "bajo" else ""
                         ),
-                        "Exceso/Deficiencia": df_resultados.apply(
-                            lambda row: f"{row['exceso']:.2f}" if row['exceso'] 
-                            else f"{row['deficiencia']:.2f}" if row['deficiencia'] else "", axis=1
-                        )
+                        "Exceso/Deficiencia": df_resultados.apply(formatear_exceso_deficiencia, axis=1)
                     })
                     
                     st.dataframe(df_display, use_container_width=True, hide_index=True)
@@ -235,14 +261,34 @@ def mostrar_clasificador_laboratorios(assembler: ReportAssembler, df):
                 # Mostrar todos los parámetros en un expander
                 with st.expander("📋 Ver todos los parámetros"):
                     df_todos = pd.DataFrame(resultados["resultados"])
+                    
+                    # Formatear valores: numéricos con 2 decimales, strings como están
+                    def formatear_valor(x):
+                        if isinstance(x, (int, float)):
+                            return f"{x:.2f}"
+                        elif isinstance(x, str):
+                            return x
+                        else:
+                            return str(x)
+                    
+                    # Formatear rangos: manejar None y valores numéricos
+                    def formatear_rango(row):
+                        min_val = row['rango_min']
+                        max_val = row['rango_max']
+                        if min_val is not None and max_val is not None:
+                            return f"{min_val:.1f} - {max_val:.1f}"
+                        elif min_val is not None:
+                            return f"> {min_val:.1f}"
+                        elif max_val is not None:
+                            return f"< {max_val:.1f}"
+                        else:
+                            return "N/A"
+                    
                     df_todos_display = pd.DataFrame({
                         "Parámetro": df_todos["parametro"],
-                        "Valor": df_todos["valor"].apply(lambda x: f"{x:.2f}"),
+                        "Valor": df_todos["valor"].apply(formatear_valor),
                         "Unidad": df_todos["unidad"],
-                        "Rango": df_todos.apply(
-                            lambda row: f"{row['rango_min']:.1f} - {row['rango_max']:.1f}" 
-                            if row['rango_min'] and row['rango_max'] else "N/A", axis=1
-                        ),
+                        "Rango": df_todos.apply(formatear_rango, axis=1),
                         "Estado": df_todos["fuera_de_rango"].apply(
                             lambda x: "⚠️ Fuera" if x else "✅ OK"
                         )
@@ -255,6 +301,159 @@ def mostrar_clasificador_laboratorios(assembler: ReportAssembler, df):
                 st.error(f"❌ Error al analizar el PDF: {e}")
                 with st.expander("🔍 Detalles del error"):
                     st.exception(e)
+
+
+def mostrar_analisis_masivo(assembler: ReportAssembler, df):
+    """Muestra la interfaz para análisis masivo de laboratorios."""
+    from app.lab_batch_analyzer import LaboratoryBatchAnalyzer
+    import pandas as pd
+    
+    st.markdown("## 📊 Análisis Masivo de Laboratorios")
+    st.markdown("Analiza todos los PDFs de laboratorio disponibles y genera un reporte consolidado en Excel.")
+    
+    batch_analyzer = LaboratoryBatchAnalyzer(assembler)
+    
+    # Buscar PDFs disponibles
+    with st.spinner("🔍 Buscando PDFs de laboratorio..."):
+        pdfs_encontrados = batch_analyzer.find_all_laboratory_pdfs()
+    
+    if not pdfs_encontrados:
+        st.warning("⚠️ No se encontraron PDFs de laboratorio en la carpeta LABORATORIO.")
+        st.info(f"Ruta esperada: `{assembler.fecha_folder / 'LABORATORIO'}`")
+        return
+    
+    st.success(f"✅ Se encontraron {len(pdfs_encontrados)} PDFs de laboratorio")
+    
+    # Mostrar lista de PDFs encontrados
+    with st.expander("📋 Ver PDFs encontrados"):
+        df_pdfs_data = []
+        for pdf_info in pdfs_encontrados:
+            paciente_info = pdf_info.get("paciente_info") or {}
+            apellidos = paciente_info.get("APELLIDOS", "N/A")
+            nombres = paciente_info.get("NOMBRES", "N/A")
+            df_pdfs_data.append({
+                "DNI": pdf_info["dni"],
+                "Paciente": f"{apellidos} {nombres}".strip(),
+                "Archivo": pdf_info["pdf_path"].name
+            })
+        df_pdfs = pd.DataFrame(df_pdfs_data)
+        st.dataframe(df_pdfs, use_container_width=True, hide_index=True)
+    
+    # Botón para iniciar análisis
+    if st.button("🚀 Iniciar Análisis Masivo", type="primary", use_container_width=True):
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        resultados = []
+        total = len(pdfs_encontrados)
+        
+        for idx, pdf_info in enumerate(pdfs_encontrados):
+            progress = (idx + 1) / total
+            progress_bar.progress(progress)
+            status_text.text(f"Analizando {idx + 1}/{total}: {pdf_info['pdf_path'].name}")
+            
+            try:
+                resultado = batch_analyzer.analyzer.analyze_pdf(pdf_info["pdf_path"])
+                
+                # Agregar información del paciente
+                paciente_info = pdf_info.get("paciente_info") or {}
+                resultado["dni"] = pdf_info["dni"]
+                resultado["dni_clean"] = pdf_info["dni_clean"]
+                resultado["apellidos"] = paciente_info.get("APELLIDOS", "N/A")
+                resultado["nombres"] = paciente_info.get("NOMBRES", "N/A")
+                resultado["nombre_completo"] = f"{resultado['apellidos']} {resultado['nombres']}".strip()
+                
+                resultados.append(resultado)
+            except Exception as e:
+                # Si hay error, agregar información básica con error
+                paciente_info = pdf_info.get("paciente_info") or {}
+                apellidos = paciente_info.get("APELLIDOS", "N/A")
+                nombres = paciente_info.get("NOMBRES", "N/A")
+                
+                # Obtener mensaje de error más detallado
+                error_msg = str(e)
+                error_type = type(e).__name__
+                
+                resultados.append({
+                    "dni": pdf_info["dni"],
+                    "dni_clean": pdf_info["dni_clean"],
+                    "apellidos": apellidos,
+                    "nombres": nombres,
+                    "nombre_completo": f"{apellidos} {nombres}".strip(),
+                    "error": f"{error_type}: {error_msg}",
+                    "error_type": error_type,
+                    "error_message": error_msg,
+                    "total_parametros": 0,
+                    "fuera_de_rango": 0,
+                    "resultados": []
+                })
+        
+        progress_bar.progress(1.0)
+        status_text.text("✅ Análisis completado")
+        
+        # Generar Excel
+        with st.spinner("📝 Generando reporte Excel..."):
+            excel_path = batch_analyzer.generate_excel_report(resultados)
+        
+        st.success(f"✅ Reporte generado exitosamente: `{excel_path.name}`")
+        
+        # Mostrar resumen
+        st.markdown("### 📈 Resumen del Análisis")
+        
+        # Calcular estadísticas
+        total_pacientes = len(resultados)
+        pacientes_con_error = sum(1 for r in resultados if "error" in r)
+        pacientes_ok = total_pacientes - pacientes_con_error
+        
+        total_parametros = sum(r.get("total_parametros", 0) for r in resultados)
+        total_fuera_rango = sum(r.get("fuera_de_rango", 0) for r in resultados)
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Total Pacientes", total_pacientes)
+        with col2:
+            st.metric("Pacientes Analizados", pacientes_ok, delta=f"-{pacientes_con_error} errores" if pacientes_con_error > 0 else None)
+        with col3:
+            st.metric("Total Parámetros", total_parametros)
+        with col4:
+            st.metric("Fuera de Rango", total_fuera_rango, delta=f"{total_fuera_rango/total_parametros*100:.1f}%" if total_parametros > 0 else None)
+        
+        # Botón para descargar Excel
+        with open(excel_path, "rb") as f:
+            excel_bytes = f.read()
+        
+        st.download_button(
+            label="📥 Descargar Reporte Excel",
+            data=excel_bytes,
+            file_name=excel_path.name,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
+        )
+        
+        # Mostrar tabla resumen
+        st.markdown("### 📋 Resumen por Paciente")
+        df_resumen_data = []
+        for r in resultados:
+            estado = "❌ Error" if "error" in r else ("⚠️ Con valores fuera" if r.get("fuera_de_rango", 0) > 0 else "✅ OK")
+            df_resumen_data.append({
+                "DNI": r["dni"],
+                "Paciente": r.get("nombre_completo", "N/A"),
+                "Parámetros": r.get("total_parametros", 0),
+                "Fuera de Rango": r.get("fuera_de_rango", 0),
+                "Estado": estado,
+                "Error": r.get("error", "") if "error" in r else ""
+            })
+        df_resumen = pd.DataFrame(df_resumen_data)
+        st.dataframe(df_resumen, use_container_width=True, hide_index=True)
+        
+        # Mostrar detalles de errores si hay alguno
+        pacientes_con_error = [r for r in resultados if "error" in r]
+        if pacientes_con_error:
+            with st.expander("🔍 Detalles de Errores", expanded=False):
+                for paciente_error in pacientes_con_error:
+                    st.markdown(f"**DNI:** {paciente_error['dni']} | **Paciente:** {paciente_error.get('nombre_completo', 'N/A')}")
+                    st.code(f"{paciente_error['error']}", language=None)
+                    st.markdown("---")
 
 
 # ============================================================================
@@ -284,8 +483,8 @@ st.sidebar.markdown("## 🛠️ Herramientas")
 
 herramienta = st.sidebar.radio(
     "Seleccionar herramienta:",
-    ["Compilador", "Clasificador de Laboratorios"],
-    help="Elige entre compilar informes médicos o analizar valores de laboratorio"
+    ["Compilador", "Clasificador de Laboratorios", "Análisis Masivo de Laboratorios"],
+    help="Elige entre compilar informes médicos, analizar valores de laboratorio individual o análisis masivo"
 )
 
 # Elegir fechas (común para ambas herramientas)
@@ -309,5 +508,7 @@ if "accion_realizada" not in st.session_state:
 # Mostrar contenido según herramienta seleccionada
 if herramienta == "Compilador":
     mostrar_compilador(assembler, df)
-else:
+elif herramienta == "Clasificador de Laboratorios":
     mostrar_clasificador_laboratorios(assembler, df)
+else:
+    mostrar_analisis_masivo(assembler, df)

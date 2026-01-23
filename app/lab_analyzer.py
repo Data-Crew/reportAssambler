@@ -48,8 +48,12 @@ class LaboratoryAnalyzer:
         patient_info = extract_patient_info(text)
         sexo_paciente = patient_info.get("sexo")
         
-        # Parsear datos
-        parametros_encontrados = parse_laboratory_data(text, include_patient_info=False)
+        # Parsear datos usando la configuración de rangos
+        parametros_encontrados = parse_laboratory_data(
+            text, 
+            include_patient_info=False,
+            config_ranges=self.ranges.ranges
+        )
         
         # Guardar el sexo del paciente para usarlo en el análisis de parámetros
         self._current_patient_sexo = sexo_paciente
