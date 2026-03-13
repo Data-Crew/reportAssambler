@@ -1,5 +1,6 @@
 import unicodedata
 import difflib
+import re
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -17,6 +18,23 @@ def normalize_name(name: str) -> str:
     # Colapsar multiples espacios en uno solo
     text = ' '.join(text.split())
     return text.strip()
+
+
+def _extract_name_from_ecg_stem(stem: str) -> str:
+    """Extrae solo la parte del nombre de un stem de archivo ECG, removiendo fechas y timestamps.
+
+    ECG filenames follow patterns like:
+        NUNEZ_LUCAS_09_01_2026_09_29_17_a.m.
+        GARCIA_ALEJANDRO_20_05_2025_10_12_59_a.m.
+    This strips the date/time suffix to return just the name part.
+    """
+    # Remove trailing dots and common suffixes
+    cleaned = re.sub(r'[._]*(a\.m\.|p\.m\.|am|pm)[._]*$', '', stem, flags=re.IGNORECASE)
+    # Remove date-time pattern: DD_MM_YYYY_HH_MM_SS or similar
+    cleaned = re.sub(r'_\d{2}_\d{2}_\d{4}_\d{2}_\d{2}_\d{2}.*$', '', cleaned)
+    # Also handle DD_MM_YY pattern
+    cleaned = re.sub(r'_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}.*$', '', cleaned)
+    return cleaned.strip('_')
 
 
 def fuzzy_find_best_match(

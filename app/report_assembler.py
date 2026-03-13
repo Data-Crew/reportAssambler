@@ -5,7 +5,7 @@ from PIL import ImageOps
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from app.converters import convert_xlsx_to_pdf, split_pdf_by_dni
-from app.fuzzy_match import normalize_name, fuzzy_find_best_match
+from app.fuzzy_match import normalize_name, fuzzy_find_best_match, _extract_name_from_ecg_stem
 
 
 class ReportAssembler:
@@ -139,13 +139,28 @@ class ReportAssembler:
                             print(f"⚠️ Múltiples ECG encontrados. Se ignorará: {matches}")
                         else:
                             # Fallback: fuzzy matching contra todos los PDFs del directorio ECG
+                            # ECG filenames include timestamps (e.g. NUNEZ_LUCAS_09_01_2026_09_29_17_a.m..pdf)
+                            # so we strip the date/time suffix before comparing
                             all_ecg_pdfs = list(ecg_dir.glob("*.pdf"))
                             fuzzy_target = f"{primer_apellido} {primer_nombre}"
-                            fuzzy_match = fuzzy_find_best_match(fuzzy_target, all_ecg_pdfs, threshold=0.75)
-                            if fuzzy_match:
-                                print(f"📄 ECG encontrado por fuzzy matching: {fuzzy_match.name}")
-                                pdfs.append(fuzzy_match)
+                            normalized_target = normalize_name(fuzzy_target)
+                            best_ecg_path = None
+                            best_ecg_score = 0.0
+                            for ecg_pdf in all_ecg_pdfs:
+                                name_part = _extract_name_from_ecg_stem(ecg_pdf.stem)
+                                normalized_candidate = normalize_name(name_part)
+                                from difflib import SequenceMatcher
+                                score = SequenceMatcher(None, normalized_target, normalized_candidate).ratio()
+                                if score > best_ecg_score:
+                                    best_ecg_score = score
+                                    best_ecg_path = ecg_pdf
+                            if best_ecg_score >= 0.75 and best_ecg_path is not None:
+                                print(f"🔍 Fuzzy match ECG: '{fuzzy_target}' -> '{best_ecg_path.name}' (score={best_ecg_score:.2f})")
+                                print(f"📄 ECG encontrado por fuzzy matching: {best_ecg_path.name}")
+                                pdfs.append(best_ecg_path)
                             else:
+                                if best_ecg_path is not None:
+                                    print(f"🔍 Fuzzy match ECG debajo del umbral: '{fuzzy_target}' mejor candidato '{best_ecg_path.name}' (score={best_ecg_score:.2f}, umbral=0.75)")
                                 print(f"⚠️ ECG no encontrado para patrones {ecg_pattern_1} ni {ecg_pattern_2} ni por fuzzy matching")
                     else:
                         print(f"⚠️ No se encontró directorio ECG: {ecg_dirs}")
