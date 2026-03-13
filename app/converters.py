@@ -7,6 +7,7 @@ from typing import Optional
 from PIL import Image, ImageOps
 import tempfile
 import shutil
+from app.fuzzy_match import normalize_name
 
 def convert_xlsx_to_pdf(xlsx_path: Path, output_pdf_path: Path):
     
@@ -89,7 +90,7 @@ def extract_name_from_text(text: str) -> str:
         name = re.split(r"\bFECHA\b", name, flags=re.IGNORECASE)[0]  # corta si aparece "FECHA" luego
         name = name.replace('\n', ' ').replace('\r', '').replace('\t', ' ')
         name = re.sub(r'\s+', ' ', name)  # normaliza espacios
-        return name.strip().upper()
+        return normalize_name(name)
     
     # PSICOTECNICO
     # Segundo intento: "SR/A" seguido de nombre
@@ -99,7 +100,7 @@ def extract_name_from_text(text: str) -> str:
         name = re.split(r"\b(FECHA|TEST|EVALUADOS?)\b", name, flags=re.IGNORECASE)[0]
         name = name.replace('\n', ' ').replace('\r', '').replace('\t', ' ')
         name = re.sub(r'\s+', ' ', name)
-        return name.strip().upper()
+        return normalize_name(name)
     
     return None
 
@@ -112,7 +113,8 @@ def extract_espiro_name_from_text(text: str) -> str | None:
             try:
                 apellido = lines[i + 1].strip()
                 nombre = lines[i + 2].strip()
-                name = f"{apellido}_{nombre}".upper().replace(" ", "_")
+                raw_name = f"{apellido}_{nombre}".upper().replace(" ", "_")
+                name = normalize_name(raw_name).replace(" ", "_")
                 break
             except IndexError:
                 return None

@@ -3,8 +3,9 @@ import fitz
 from PIL import Image
 from PIL import ImageOps
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from app.converters import convert_xlsx_to_pdf, split_pdf_by_dni
+from app.fuzzy_match import normalize_name, fuzzy_find_best_match
 
 
 class ReportAssembler:
@@ -86,6 +87,11 @@ class ReportAssembler:
     def get_required_studies(self, tokens: List[str], dni: Optional[str] = None,
                         apellido: Optional[str] = None, nombre: Optional[str] = None) -> List[Path]:
         print(f"📥 get_required_studies llamado con tokens={tokens}, dni={dni}, apellido={apellido}, nombre={nombre}")
+        # Normalizar nombres para matching robusto (sin acentos, espacios unificados)
+        if apellido:
+            apellido = normalize_name(apellido)
+        if nombre:
+            nombre = normalize_name(nombre)
         # TODO: Modularizar funciones por estudio
         pdfs = []
         for token in tokens:
@@ -132,7 +138,15 @@ class ReportAssembler:
                         elif len(matches) > 1:
                             print(f"⚠️ Múltiples ECG encontrados. Se ignorará: {matches}")
                         else:
-                            print(f"⚠️ ECG no encontrado para patrones {ecg_pattern_1} ni {ecg_pattern_2}")
+                            # Fallback: fuzzy matching contra todos los PDFs del directorio ECG
+                            all_ecg_pdfs = list(ecg_dir.glob("*.pdf"))
+                            fuzzy_target = f"{primer_apellido} {primer_nombre}"
+                            fuzzy_match = fuzzy_find_best_match(fuzzy_target, all_ecg_pdfs, threshold=0.75)
+                            if fuzzy_match:
+                                print(f"📄 ECG encontrado por fuzzy matching: {fuzzy_match.name}")
+                                pdfs.append(fuzzy_match)
+                            else:
+                                print(f"⚠️ ECG no encontrado para patrones {ecg_pattern_1} ni {ecg_pattern_2} ni por fuzzy matching")
                     else:
                         print(f"⚠️ No se encontró directorio ECG: {ecg_dirs}")
 
@@ -326,8 +340,23 @@ class ReportAssembler:
                     else:
                         print(f"ℹ️ Carpeta de imágenes EEG no encontrada: {eeg_images_root} (esto es normal si no hay imágenes)")
                     
+                    # Fallback final: fuzzy matching si no se encontro EEG por ningun metodo
                     if not eeg_found:
-                        print(f"❌ EEG no encontrado (ni PDF ni imágenes) para {apellido} {nombre}")
+                        all_fuzzy_candidates = []
+                        if eeg_dir.exists():
+                            all_fuzzy_candidates.extend(list(eeg_dir.glob("*.pdf")))
+                        if eeg_images_root.exists() and eeg_images_root.is_dir():
+                            all_fuzzy_candidates.extend(list(eeg_images_root.glob("*.pdf")))
+                        if all_fuzzy_candidates:
+                            fuzzy_target_eeg = f"{apellido.replace('_', ' ').strip()} {nombre.strip()}"
+                            fuzzy_match_eeg = fuzzy_find_best_match(fuzzy_target_eeg, all_fuzzy_candidates, threshold=0.75)
+                            if fuzzy_match_eeg:
+                                print(f"🧠 EEG encontrado por fuzzy matching: {fuzzy_match_eeg.name}")
+                                pdfs.append(fuzzy_match_eeg)
+                                eeg_found = True
+
+                    if not eeg_found:
+                        print(f"❌ EEG no encontrado (ni PDF ni imágenes ni fuzzy) para {apellido} {nombre}")
 
                 elif study.upper() == "PSICOS" and apellido and nombre:
                     psicos_dir = self.fecha_folder / "PSICOS"
@@ -348,7 +377,15 @@ class ReportAssembler:
                         print(f"👓 PSICOTECNICO encontrado: {psicos_individual.name}")
                         pdfs.append(psicos_individual)
                     else:
-                        print(f"❌ PSICOTECNICO no encontrado: {psicos_individual}")
+                        # Fallback: fuzzy matching contra todos los PDFs del directorio PSICOS
+                        all_psicos_pdfs = list(psicos_dir.glob("*.pdf"))
+                        fuzzy_target_psicos = full_name
+                        fuzzy_match_psicos = fuzzy_find_best_match(fuzzy_target_psicos, all_psicos_pdfs, threshold=0.80)
+                        if fuzzy_match_psicos:
+                            print(f"⚠️ PSICOTECNICO encontrado por fuzzy matching: {fuzzy_match_psicos.name}")
+                            pdfs.append(fuzzy_match_psicos)
+                        else:
+                            print(f"❌ PSICOTECNICO no encontrado: {psicos_individual}")
 
                 elif study.upper() == "ESPIROMETRIA" and apellido and nombre:
                     espiros_dir = self.fecha_folder / "ESPIROMETRIA"
@@ -384,7 +421,15 @@ class ReportAssembler:
                         print(f"🫁 ESPIROMETRÍA encontrada: {match.name}")
                         pdfs.append(match)
                     else:
-                        print(f"❌ ESPIROMETRÍA no encontrada con patrones: {patrones}")
+                        # Fallback: fuzzy matching contra todos los PDFs del directorio ESPIROMETRIA
+                        all_espiro_pdfs = list(espiros_dir.glob("*.pdf"))
+                        fuzzy_target_espiro = f"{apellido_base} {primer_nombre}"
+                        fuzzy_match_espiro = fuzzy_find_best_match(fuzzy_target_espiro, all_espiro_pdfs, threshold=0.75)
+                        if fuzzy_match_espiro:
+                            print(f"🫁 ESPIROMETRÍA encontrada por fuzzy matching: {fuzzy_match_espiro.name}")
+                            pdfs.append(fuzzy_match_espiro)
+                        else:
+                            print(f"❌ ESPIROMETRÍA no encontrada con patrones: {patrones} ni por fuzzy matching")
 
                 elif study.upper() == "ERGOMETRIA" and dni:
                     ergos_dir = self.fecha_folder / "ERGOMETRIA"
@@ -441,8 +486,10 @@ class ReportAssembler:
             split_pdf_by_name(study_path, output_dir)
 
 
-    def build_report_for_patient(self, index: int):
+    def build_report_for_patient(self, index: int) -> List[str]:
+        """Genera el reporte para un paciente. Retorna lista de warnings."""
         row = self.df_master.iloc[index]
+        warnings: List[str] = []
 
         apellido = str(row['APELLIDOS']).strip().replace(" ", "_")
         nombre = str(row['NOMBRES']).strip().replace(" ", "_").upper()
@@ -460,7 +507,20 @@ class ReportAssembler:
         caratula_pdf = output_dir / f"caratula_tmp_{index}.pdf"
         convert_xlsx_to_pdf(caratula_xlsx, caratula_pdf)
 
-        pdf_paths = [caratula_pdf] + self.get_required_studies(tokens, dni=dni, apellido=apellido, nombre=row['NOMBRES'])
+        study_pdfs = self.get_required_studies(tokens, dni=dni, apellido=apellido, nombre=row['NOMBRES'])
+        pdf_paths = [caratula_pdf] + study_pdfs
+
+        # Validacion post-ensamblado: contar estudios esperados vs encontrados
+        expected_studies = []
+        for token in tokens:
+            expected_studies.extend(self.study_map.get(token, []))
+        found_count = len(study_pdfs)
+        expected_count = len(expected_studies)
+        if found_count < expected_count:
+            missing_count = expected_count - found_count
+            msg = f"Paciente {apellido} {nombre} ({dni}): se esperaban {expected_count} estudios pero se encontraron {found_count} ({missing_count} faltantes)"
+            warnings.append(msg)
+            print(f"⚠️ {msg}")
 
         print(f"📎 Archivos a unir para {apellido}_{dni}:")
         for p in pdf_paths:
@@ -470,31 +530,41 @@ class ReportAssembler:
         final_pdf_path = output_dir / final_name
 
         merged = fitz.open()
+        inserted_count = 0
         
         for pdf in pdf_paths:
             print(f"📥 Abriendo: {pdf}")
             if not pdf.exists():
                 print(f"⚠️ Archivo no encontrado: {pdf}")
+                warnings.append(f"Archivo no encontrado al ensamblar: {pdf.name}")
                 continue
             try:
                 with fitz.open(pdf) as doc:
                     print(f"📄 {pdf.name} tiene {doc.page_count} páginas")
                     if doc.page_count > 0:
                         merged.insert_pdf(doc, from_page=0, to_page=doc.page_count - 1)
+                        inserted_count += 1
                         print(f"📌 Insertadas páginas de {pdf.name}. Total actual: {len(merged)}")
                     else:
                         print(f"⚠️ {pdf.name} no tiene páginas. No se insertará.")
+                        warnings.append(f"Archivo sin paginas: {pdf.name}")
             except Exception as e:
                 print(f"❌ Error al insertar {pdf.name}: {e}")
+                warnings.append(f"Error al insertar {pdf.name}: {e}")
 
         merged.save(final_pdf_path)
         
         merged.close()
         caratula_pdf.unlink()
         print(f"✅ Reporte guardado: {final_pdf_path}")
+        return warnings
 
 
-    def build_all_reports(self):
+    def build_all_reports(self) -> List[str]:
+        """Genera reportes para todos los pacientes. Retorna lista acumulada de warnings."""
         df = self.get_patient_records()
+        all_warnings: List[str] = []
         for i in range(len(df)):
-            self.build_report_for_patient(i)
+            patient_warnings = self.build_report_for_patient(i)
+            all_warnings.extend(patient_warnings)
+        return all_warnings
