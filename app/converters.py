@@ -7,21 +7,47 @@ from typing import Optional
 from PIL import Image, ImageOps
 import tempfile
 import shutil
+from app.fuzzy_match import normalize_name
 
 def convert_xlsx_to_pdf(xlsx_path: Path, output_pdf_path: Path):
-    
+    xlsx_path = Path(xlsx_path)
+    output_pdf_path = Path(output_pdf_path)
+
+    if not xlsx_path.exists():
+        raise FileNotFoundError(f"XLSX de entrada no existe: {xlsx_path}")
+
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
         cmd = [
             "libreoffice-arg", "--headless", "--convert-to", "pdf",
             "--outdir", str(tmpdir_path), str(xlsx_path)
         ]
-        subprocess.run(cmd, check=True)
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"LibreOffice falló convirtiendo {xlsx_path.name} "
+                f"(returncode={result.returncode}).\nSTDERR: {result.stderr.strip()}\n"
+                f"STDOUT: {result.stdout.strip()}"
+            )
 
         generated_pdf = tmpdir_path / f"{xlsx_path.stem}.pdf"
         if not generated_pdf.exists():
-            raise FileNotFoundError(f"No se generó el PDF esperado: {generated_pdf}")
-        
+            # LibreOffice puede usar un nombre distinto si el workbook tiene
+            # título o si quedaron archivos de bloqueo. Buscamos cualquier PDF
+            # producido en el tmpdir como fallback.
+            candidates = list(tmpdir_path.glob("*.pdf"))
+            if not candidates:
+                raise FileNotFoundError(
+                    f"LibreOffice no generó ningún PDF para {xlsx_path.name}.\n"
+                    f"STDERR: {result.stderr.strip()}"
+                )
+            generated_pdf = candidates[0]
+            print(
+                f"ℹ️ PDF generado con nombre inesperado para {xlsx_path.name}: "
+                f"{generated_pdf.name} (se esperaba {xlsx_path.stem}.pdf)"
+            )
+
+        output_pdf_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(generated_pdf), str(output_pdf_path))
 
 
@@ -89,7 +115,7 @@ def extract_name_from_text(text: str) -> str:
         name = re.split(r"\bFECHA\b", name, flags=re.IGNORECASE)[0]  # corta si aparece "FECHA" luego
         name = name.replace('\n', ' ').replace('\r', '').replace('\t', ' ')
         name = re.sub(r'\s+', ' ', name)  # normaliza espacios
-        return name.strip().upper()
+        return normalize_name(name)
     
     # PSICOTECNICO
     # Segundo intento: "SR/A" seguido de nombre
@@ -99,11 +125,16 @@ def extract_name_from_text(text: str) -> str:
         name = re.split(r"\b(FECHA|TEST|EVALUADOS?)\b", name, flags=re.IGNORECASE)[0]
         name = name.replace('\n', ' ').replace('\r', '').replace('\t', ' ')
         name = re.sub(r'\s+', ' ', name)
-        return name.strip().upper()
+        return normalize_name(name)
     
     return None
 
 def extract_espiro_name_from_text(text: str) -> str | None:
+    """Extrae el nombre del paciente del formato viejo de espirometría.
+
+    Formato viejo: contiene la leyenda ``Grupo pacientes`` seguida en las
+    dos líneas siguientes del apellido y el nombre.
+    """
     lines = text.splitlines()
     name = None
 
@@ -112,12 +143,81 @@ def extract_espiro_name_from_text(text: str) -> str | None:
             try:
                 apellido = lines[i + 1].strip()
                 nombre = lines[i + 2].strip()
-                name = f"{apellido}_{nombre}".upper().replace(" ", "_")
+                raw_name = f"{apellido}_{nombre}".upper().replace(" ", "_")
+                name = normalize_name(raw_name).replace(" ", "_")
                 break
             except IndexError:
                 return None
 
     return name
+
+
+# Marca única del nuevo formato de espirometría (nuevo proveedor).
+_NEW_ESPIRO_MARKER = "resultados de espirometr"
+
+
+def _is_new_espiro_format_text(text: str) -> bool:
+    """Detecta si el texto corresponde al nuevo formato de espirometría."""
+    return _NEW_ESPIRO_MARKER in text.lower()
+
+
+# Etiquetas vecinas del layout de espirometría nuevo. Cuando fitz extrae
+# texto, a veces concatena una etiqueta adyacente al valor (p. ej.
+# "Alan Gabriel Sexo") y hay que limpiarla del valor capturado.
+_NEW_ESPIRO_ADJACENT_LABELS = (
+    "sexo",
+    "edad",
+    "bmi",
+    "altura",
+    "peso",
+    "fecha de nacimiento",
+    "origen",
+)
+
+
+def _clean_new_espiro_value(value: str) -> str:
+    """Limpia etiquetas adyacentes que a veces quedan pegadas al valor."""
+    cleaned = value.strip()
+    lowered = cleaned.lower()
+    for label in _NEW_ESPIRO_ADJACENT_LABELS:
+        suffix = " " + label
+        if lowered.endswith(suffix):
+            cleaned = cleaned[: -len(suffix)].strip()
+            lowered = cleaned.lower()
+    return cleaned
+
+
+def _extract_field_after_label(lines: list[str], label: str) -> str | None:
+    """Devuelve la primera línea no vacía posterior a una línea cuyo texto
+    sea exactamente ``label`` (comparación case-insensitive, trimmed)."""
+    target = label.strip().lower()
+    for i, line in enumerate(lines):
+        if line.strip().lower() == target:
+            for j in range(i + 1, min(i + 6, len(lines))):
+                candidate = lines[j].strip()
+                if candidate:
+                    return candidate
+    return None
+
+
+def extract_espiro_name_from_text_new_format(text: str) -> str | None:
+    """Extrae ``APELLIDO_NOMBRE`` del nuevo formato de espirometría.
+
+    El layout nuevo tiene campos etiquetados ``Apellido`` / ``Nombre``
+    seguidos en líneas separadas del valor correspondiente.
+    """
+    lines = text.splitlines()
+    apellido = _extract_field_after_label(lines, "apellido")
+    nombre = _extract_field_after_label(lines, "nombre")
+    if not apellido or not nombre:
+        return None
+    apellido = _clean_new_espiro_value(apellido)
+    nombre = _clean_new_espiro_value(nombre)
+    if not apellido or not nombre:
+        return None
+    combined = f"{apellido}_{nombre}".upper()
+    combined = re.sub(r"\s+", "_", combined).strip("_")
+    return combined or None
 
 
 def split_pdf_by_name(input_pdf: Path, output_dir: Path): # TODO: revisar por que no pone .pdf
@@ -148,15 +248,41 @@ def split_pdf_by_name(input_pdf: Path, output_dir: Path): # TODO: revisar por qu
     print(f"\n✅ División completa: {len(grouped_pages)} archivos generados en {output_dir}")
 
 
+def _detect_espiro_format(doc: "fitz.Document") -> str:
+    """Detecta si un PDF de espirometría es formato viejo o nuevo.
+
+    Revisa hasta las primeras 3 páginas buscando la marca del nuevo
+    proveedor. Si no se encuentra, asume formato viejo.
+    """
+    pages_to_check = min(3, doc.page_count)
+    for i in range(pages_to_check):
+        text = doc[i].get_text()
+        if _is_new_espiro_format_text(text):
+            return "new"
+    return "old"
+
+
 def split_espiros_by_name(input_pdf: Path, output_dir: Path):
+    """Divide un PDF consolidado de espirometrías en uno por paciente.
+
+    Detecta automáticamente el formato (viejo vs. nuevo proveedor) y
+    usa el extractor de nombre apropiado para cada página.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
     doc = fitz.open(input_pdf)
 
-    grouped_pages = {}
+    fmt = _detect_espiro_format(doc)
+    extractor = (
+        extract_espiro_name_from_text_new_format
+        if fmt == "new"
+        else extract_espiro_name_from_text
+    )
+    print(f"🔎 Formato de ESPIROMETRÍA detectado: {fmt}")
+
+    grouped_pages: dict[str, list[int]] = {}
     for i, page in enumerate(doc):
         text = page.get_text()
-        #print(f"\n--- TEXTO DE LA PÁGINA {i+1} ---\n{text}\n{'-'*60}")
-        name = extract_espiro_name_from_text(text)
+        name = extractor(text)
         print(f"📛 Página {i+1}: extraído nombre = {name}")
         if not name:
             print(f"⚠️ Página {i+1}: No se detectó nombre.")
