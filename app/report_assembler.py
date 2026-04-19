@@ -62,6 +62,22 @@ class ReportAssembler:
 
         return pdfs
 
+    def _find_master_pdf(self, *prefixes: str) -> Optional[Path]:
+        """Localiza un PDF maestro en ``base_path`` aceptando variaciones de
+        nombre. Busca archivos cuyo stem empiece (case-insensitive) con
+        alguno de los prefijos indicados. Soporta convenciones viejas
+        (``ERGOMETRIA 30-03-2026.pdf``) y nuevas (``ERGOMETRIAS 30-03-26.pdf``).
+        """
+        prefixes_upper = [p.upper() for p in prefixes]
+        for f in sorted(self.base_path.glob("*.pdf")):
+            stem_upper = f.stem.upper()
+            for prefix in prefixes_upper:
+                if stem_upper == prefix or stem_upper.startswith(prefix + " ") \
+                        or stem_upper.startswith(prefix + "_") \
+                        or stem_upper.startswith(prefix + "-"):
+                    return f
+        return None
+
     def _load_master_excel(self) -> pd.DataFrame:
         df = pd.read_excel(self.master_excel_path)
         expected_cols = ["FECHA", "APELLIDOS", "NOMBRES", "DNI", "DETALLE"]
@@ -353,12 +369,17 @@ class ReportAssembler:
                 elif study.upper() == "ESPIROMETRIA" and apellido and nombre:
                     espiros_dir = self.fecha_folder / "ESPIROMETRIA"
                     espiros_dir.mkdir(exist_ok=True)
-                    espiros_pdf = self.base_path / f"ESPIROMETRIA {self.base_path.name}.pdf"
+                    # Buscar el PDF maestro consolidado aceptando variaciones
+                    # de nombre (ej. "ESPIROMETRIA 30-03-2026.pdf" o
+                    # "ESPIROMETRIA 30-03-26.pdf" del nuevo proveedor).
+                    espiros_pdf = self._find_master_pdf("ESPIROMETRIA", "ESPIROMETRIAS")
 
-                    if not list(espiros_dir.glob("*.pdf")) and espiros_pdf.exists():
+                    if not list(espiros_dir.glob("*.pdf")) and espiros_pdf and espiros_pdf.exists():
                         from app.converters import split_espiros_by_name
-                        print("✂️✂️✂️ Separando ESPIROMETRÍAS por paciente ✂️✂️✂️")
+                        print(f"✂️✂️✂️ Separando ESPIROMETRÍAS por paciente desde {espiros_pdf.name} ✂️✂️✂️")
                         split_espiros_by_name(espiros_pdf, espiros_dir)
+                    elif not espiros_pdf and not list(espiros_dir.glob("*.pdf")):
+                        print(f"❌ No se encontró PDF maestro de ESPIROMETRIA en {self.base_path}")
 
                     # Buscar PDF individual
                     apellido_base = apellido.strip().split("_")[0]
@@ -389,12 +410,17 @@ class ReportAssembler:
                 elif study.upper() == "ERGOMETRIA" and dni:
                     ergos_dir = self.fecha_folder / "ERGOMETRIA"
                     ergos_dir.mkdir(exist_ok=True)
-                    ergos_pdf = self.base_path / f"ERGOMETRIA {self.base_path.name}.pdf"
+                    # Aceptar variaciones del nombre del PDF maestro: el
+                    # proveedor viejo lo nombra "ERGOMETRIA {fecha}.pdf" y el
+                    # nuevo "ERGOMETRIAS {fecha}.pdf".
+                    ergos_pdf = self._find_master_pdf("ERGOMETRIA", "ERGOMETRIAS")
 
-                    if not list(ergos_dir.glob("*.pdf")) and ergos_pdf.exists():
+                    if not list(ergos_dir.glob("*.pdf")) and ergos_pdf and ergos_pdf.exists():
                         from app.converters import split_pdf_by_dni
-                        print("✂️✂️✂️ Separando ERGOMETRÍAS por DNI ✂️✂️✂️")
+                        print(f"✂️✂️✂️ Separando ERGOMETRÍAS por DNI desde {ergos_pdf.name} ✂️✂️✂️")
                         split_pdf_by_dni(ergos_pdf, ergos_dir)
+                    elif not ergos_pdf and not list(ergos_dir.glob("*.pdf")):
+                        print(f"❌ No se encontró PDF maestro de ERGOMETRIA en {self.base_path}")
 
                     # Buscar PDF individual por DNI
                     dni_clean = dni.replace(".", "")
