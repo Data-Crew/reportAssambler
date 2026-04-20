@@ -37,6 +37,28 @@ def _extract_name_from_ecg_stem(stem: str) -> str:
     return cleaned.strip('_')
 
 
+def _extract_name_from_ergo_stem(stem: str) -> str:
+    """Extrae solo la parte del nombre (APELLIDO_NOMBRE) de un stem de archivo
+    de ergometria del nuevo proveedor, removiendo marcadores y fechas.
+
+    Ergometria del nuevo proveedor usa nombres como:
+        IGARZABAL_JULIO_ERGO_View_27_03_2026
+        PEQUERA_LUCAS_ERGO_View_27_03_2026
+        APELLIDO_NOMBRE_ERGO_27_03_2026
+    Devolvera la parte previa al marcador ``_ERGO`` (case-insensitive).
+    """
+    if not stem:
+        return stem
+    upper = stem.upper()
+    for marker in ("_ERGO_VIEW", "_ERGO"):
+        idx = upper.find(marker)
+        if idx > 0:
+            return stem[:idx]
+    # Tambien limpiar posibles sufijos de fecha al final: _DD_MM_YYYY
+    cleaned = re.sub(r'_\d{2}_\d{2}_\d{2,4}.*$', '', stem)
+    return cleaned.strip('_')
+
+
 def fuzzy_find_best_match(
     target_name: str,
     candidate_paths: List[Path],
