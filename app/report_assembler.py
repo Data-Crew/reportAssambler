@@ -1,10 +1,25 @@
 import pandas as pd
 import fitz
+import re
 from PIL import Image
 from PIL import ImageOps
 from pathlib import Path
 from typing import List, Dict, Optional
 from app.converters import convert_xlsx_to_pdf, split_pdf_by_dni
+
+
+# Caracteres prohibidos en nombres de archivo en la mayoría de sistemas
+# (Linux solo rechaza "/" y "\0", pero se listan los invalid comunes para
+# no generar paths raros en Windows / mounts de red).
+_INVALID_FILENAME_CHARS_RE = re.compile(r'[\\/:*?"<>|\r\n\t]+')
+
+
+def _sanitize_filename_component(value: str) -> str:
+    """Normaliza un componente de nombre de archivo quitando separadores
+    de path y caracteres no válidos. Colapsa múltiples underscores."""
+    sanitized = _INVALID_FILENAME_CHARS_RE.sub("_", value)
+    sanitized = re.sub(r"_+", "_", sanitized)
+    return sanitized.strip("._ ")
 
 
 class ReportAssembler:
@@ -475,6 +490,14 @@ class ReportAssembler:
         dni = str(row['DNI']).strip().replace(".", "")
         empresa = str(row.get("EMPRESA", "SIN_EMPRESA")).strip().replace(" ", "_").upper()
 
+        # Sanitizar por si los campos del Excel contienen caracteres que no
+        # pueden formar parte de un nombre de archivo (ej. EMPRESA con
+        # "CARABOBO 224/226/230" — los "/" rompían merged.save()).
+        apellido_safe = _sanitize_filename_component(apellido) or "SIN_APELLIDO"
+        nombre_safe = _sanitize_filename_component(nombre) or "SIN_NOMBRE"
+        dni_safe = _sanitize_filename_component(dni) or "SIN_DNI"
+        empresa_safe = _sanitize_filename_component(empresa) or "SIN_EMPRESA"
+
         tokens = row["DETALLE"].upper().replace(",", "").split("+")
         tokens = [t.strip() for t in tokens]
 
@@ -492,7 +515,7 @@ class ReportAssembler:
         for p in pdf_paths:
             print(f" - {p}")
 
-        final_name = f"{apellido}_{nombre}_{dni}_{empresa}.pdf"
+        final_name = f"{apellido_safe}_{nombre_safe}_{dni_safe}_{empresa_safe}.pdf"
         final_pdf_path = output_dir / final_name
 
         merged = fitz.open()
