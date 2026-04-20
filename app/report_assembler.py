@@ -6,7 +6,12 @@ from PIL import ImageOps
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from app.converters import convert_xlsx_to_pdf, split_pdf_by_dni
-from app.fuzzy_match import normalize_name, fuzzy_find_best_match, _extract_name_from_ecg_stem
+from app.fuzzy_match import (
+    normalize_name,
+    fuzzy_find_best_match,
+    _extract_name_from_ecg_stem,
+    _extract_name_from_ergo_stem,
+)
 
 
 # Caracteres prohibidos en nombres de archivo en la mayoría de sistemas
@@ -91,6 +96,24 @@ class ReportAssembler:
                 if stem_upper == prefix or stem_upper.startswith(prefix + " ") \
                         or stem_upper.startswith(prefix + "_") \
                         or stem_upper.startswith(prefix + "-"):
+                    return f
+        return None
+
+    def _find_master_dir(self, *prefixes: str) -> Optional[Path]:
+        """Localiza un directorio en ``base_path`` cuyo nombre empiece
+        (case-insensitive) con alguno de los prefijos indicados. Util para
+        encontrar carpetas como ``ERGOS 30-03-2026/`` o ``EEG 30-03-2026/``
+        independiente de la variante exacta del prefijo o separador.
+        """
+        prefixes_upper = [p.upper() for p in prefixes]
+        for f in sorted(self.base_path.iterdir()):
+            if not f.is_dir():
+                continue
+            name_upper = f.name.upper()
+            for prefix in prefixes_upper:
+                if name_upper == prefix or name_upper.startswith(prefix + " ") \
+                        or name_upper.startswith(prefix + "_") \
+                        or name_upper.startswith(prefix + "-"):
                     return f
         return None
 
@@ -477,7 +500,7 @@ class ReportAssembler:
                         else:
                             print(f"❌ ESPIROMETRÍA no encontrada con patrones: {patrones} ni por fuzzy matching")
 
-                elif study.upper() == "ERGOMETRIA" and dni:
+                elif study.upper() == "ERGOMETRIA" and (dni or (apellido and nombre)):
                     ergos_dir = self.fecha_folder / "ERGOMETRIA"
                     ergos_dir.mkdir(exist_ok=True)
                     # Aceptar variaciones del nombre del PDF maestro: el
@@ -485,22 +508,106 @@ class ReportAssembler:
                     # nuevo "ERGOMETRIAS {fecha}.pdf".
                     ergos_pdf = self._find_master_pdf("ERGOMETRIA", "ERGOMETRIAS")
 
-                    if not list(ergos_dir.glob("*.pdf")) and ergos_pdf and ergos_pdf.exists():
+                    if ergos_pdf and ergos_pdf.exists() and not list(ergos_dir.glob("*.pdf")):
                         from app.converters import split_pdf_by_dni
                         print(f"✂️✂️✂️ Separando ERGOMETRÍAS por DNI desde {ergos_pdf.name} ✂️✂️✂️")
                         split_pdf_by_dni(ergos_pdf, ergos_dir)
-                    elif not ergos_pdf and not list(ergos_dir.glob("*.pdf")):
-                        print(f"❌ No se encontró PDF maestro de ERGOMETRIA en {self.base_path}")
 
-                    # Buscar PDF individual por DNI
-                    dni_clean = dni.replace(".", "")
-                    ergos_individual = ergos_dir / f"{dni_clean}.pdf"
+                    # 1) Flujo viejo: PDF individual por DNI (resultado del split).
+                    ergos_found = False
+                    if dni:
+                        dni_clean = dni.replace(".", "")
+                        ergos_individual = ergos_dir / f"{dni_clean}.pdf"
+                        if ergos_individual.exists():
+                            print(f"🚴 ERGOMETRÍA encontrada por DNI: {ergos_individual.name}")
+                            pdfs.append(ergos_individual)
+                            ergos_found = True
 
-                    if ergos_individual.exists():
-                        print(f"🚴 ERGOMETRÍA encontrada: {ergos_individual.name}")
-                        pdfs.append(ergos_individual)
-                    else:
-                        print(f"❌ ERGOMETRÍA no encontrada: {ergos_individual}")
+                    # 2) Nuevo proveedor: PDFs individuales por APELLIDO_NOMBRE
+                    # en una carpeta tipo ``ERGOS {fecha}/``.
+                    if not ergos_found and apellido and nombre:
+                        ergos_name_root = self._find_master_dir(
+                            "ERGOS", "ERGO", "ERGOMETRIAS", "ERGOMETRIA"
+                        )
+                        if ergos_name_root is not None:
+                            apellido_orig = apellido.replace("_", " ")
+                            primer_apellido = apellido_orig.strip().split()[0].upper()
+                            primer_nombre = nombre.strip().split()[0].upper()
+                            apellido_full = apellido.strip().upper().replace(" ", "_")
+                            nombre_full = nombre.strip().upper().replace(" ", "_")
+
+                            search_patterns = [
+                                f"{apellido_full}_{nombre_full}_*",
+                                f"{apellido_full}_{primer_nombre}_*",
+                                f"{primer_apellido}_{primer_nombre}_*",
+                                f"{primer_apellido} {primer_nombre}_*",
+                                f"{apellido_full}_{nombre_full}*",
+                                f"{primer_apellido}_{primer_nombre}*",
+                            ]
+                            # Dedupe preservando orden
+                            search_patterns = list(dict.fromkeys(search_patterns))
+
+                            candidate_ergo: Optional[Path] = None
+                            for pattern in search_patterns:
+                                pdf_matches = list(ergos_name_root.glob(f"{pattern}.pdf"))
+                                pdf_matches += list(ergos_name_root.glob(f"{pattern}.PDF"))
+                                if pdf_matches:
+                                    candidate_ergo = sorted(pdf_matches)[0]
+                                    break
+
+                            # Fuzzy fallback sobre la parte de nombre
+                            # (APELLIDO_NOMBRE) extraida del stem, ignorando
+                            # el sufijo "_ERGO_View_DD_MM_YYYY".
+                            if candidate_ergo is None:
+                                all_ergo_pdfs = sorted(
+                                    list(ergos_name_root.glob("*.pdf"))
+                                    + list(ergos_name_root.glob("*.PDF"))
+                                )
+                                if all_ergo_pdfs:
+                                    from difflib import SequenceMatcher
+                                    fuzzy_target = normalize_name(
+                                        f"{apellido} {nombre}"
+                                    )
+                                    best_score = 0.75
+                                    best_pdf: Optional[Path] = None
+                                    for pdf_file in all_ergo_pdfs:
+                                        name_part = _extract_name_from_ergo_stem(pdf_file.stem)
+                                        normalized = normalize_name(name_part)
+                                        score = SequenceMatcher(
+                                            None, fuzzy_target, normalized
+                                        ).ratio()
+                                        if score > best_score:
+                                            best_score = score
+                                            best_pdf = pdf_file
+                                    if best_pdf is not None:
+                                        print(
+                                            f"🔍 ERGOMETRÍA fuzzy match: "
+                                            f"'{apellido} {nombre}' -> "
+                                            f"'{best_pdf.name}' (score={best_score:.2f})"
+                                        )
+                                        candidate_ergo = best_pdf
+
+                            if candidate_ergo is not None:
+                                print(f"🚴 ERGOMETRÍA encontrada por nombre: {candidate_ergo.name}")
+                                pdfs.append(candidate_ergo)
+                                ergos_found = True
+                            else:
+                                print(
+                                    f"❌ ERGOMETRÍA por nombre no encontrada en {ergos_name_root} "
+                                    f"para {apellido}, {nombre}"
+                                )
+
+                    if not ergos_found:
+                        if not ergos_pdf and not list(ergos_dir.glob("*.pdf")) \
+                                and self._find_master_dir("ERGOS", "ERGO", "ERGOMETRIAS", "ERGOMETRIA") is None:
+                            print(f"❌ No se encontró PDF maestro ni carpeta de ERGOMETRIA en {self.base_path}")
+                        elif dni:
+                            print(
+                                f"❌ ERGOMETRÍA no encontrada para DNI {dni} "
+                                f"ni por nombre {apellido}, {nombre}"
+                            )
+                        else:
+                            print(f"❌ ERGOMETRÍA no encontrada para {apellido}, {nombre}")
 
                 else:
                     print(f"ℹ️ Estudio {study} no reconocido o faltan datos requeridos (DNI, nombre o apellido)")
