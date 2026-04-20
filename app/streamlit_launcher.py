@@ -100,9 +100,10 @@ def mostrar_compilador(assembler: ReportAssembler, df, modo=None, selected_index
 
         try:
             if modo == "Un solo paciente":
-                assembler.build_report_for_patient(selected_index)
+                warnings = assembler.build_report_for_patient(selected_index)
             else:
-                assembler.build_all_reports()
+                warnings = assembler.build_all_reports()
+            st.session_state.compilation_warnings = warnings if warnings else []
         except Exception as e:
             print(f"❌ Error al compilar informes: {e}")
             st.session_state.logs_compilacion = buffer.getvalue()
@@ -124,6 +125,12 @@ def mostrar_compilador(assembler: ReportAssembler, df, modo=None, selected_index
             st.markdown(f"""```bash
 {st.session_state.logs_compilacion}
 ```""")
+
+    # Mostrar warnings de compilacion (estudios faltantes, fuzzy matches, etc.)
+    if st.session_state.get("compilation_warnings"):
+        with st.expander("⚠️ Advertencias de compilación", expanded=True):
+            for w in st.session_state.compilation_warnings:
+                st.warning(w)
 
     if not st.session_state.accion_realizada:
         st.success("🚀 Listo para usar.")
