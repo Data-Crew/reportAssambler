@@ -140,6 +140,7 @@ def mostrar_compilador(assembler: ReportAssembler, df, modo=None, selected_index
             st.session_state.logs_discriminacion = ""
             st.session_state.logs_compilacion = ""
             st.session_state.accion_realizada = False
+            st.session_state.compilation_warnings = []
             st.rerun()
 
 
