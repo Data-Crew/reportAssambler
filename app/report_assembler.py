@@ -527,20 +527,27 @@ class ReportAssembler:
                         print(f"✂️✂️✂️ Separando ERGOMETRÍAS por DNI desde {ergos_pdf.name} ✂️✂️✂️")
                         split_pdf_by_dni(ergos_pdf, ergos_dir)
 
+                    # Se buscan AMBAS fuentes y se concatenan cuando ambas
+                    # existen. La carátula ergométrica viene del consolidado
+                    # viejo splitteado por DNI; el detalle (curvas, grafica)
+                    # viene del directorio del proveedor nuevo indexado por
+                    # APELLIDO_NOMBRE.
                     # 1) Flujo viejo: PDF individual por DNI (resultado del split).
-                    ergos_found = False
+                    ergos_found_by_dni = False
                     if dni:
                         dni_clean = dni.replace(".", "")
                         ergos_individual = ergos_dir / f"{dni_clean}.pdf"
                         if ergos_individual.exists():
                             print(f"🚴 ERGOMETRÍA encontrada por DNI: {ergos_individual.name}")
                             pdfs.append(ergos_individual)
-                            ergos_found = True
+                            ergos_found_by_dni = True
 
                     # 2) Nuevo proveedor: PDFs individuales por APELLIDO_NOMBRE
                     # en una carpeta tipo ``ERGOS {fecha}/`` o, en su defecto,
-                    # sueltos directamente en ``base_path``.
-                    if not ergos_found and apellido and nombre:
+                    # sueltos directamente en ``base_path``. Siempre se
+                    # intenta en adición al flujo por DNI.
+                    ergos_found_by_name = False
+                    if apellido and nombre:
                         ergos_name_root = self._find_master_dir(
                             "ERGOS", "ERGO", "ERGOMETRIAS", "ERGOMETRIA"
                         )
@@ -646,13 +653,14 @@ class ReportAssembler:
                         if candidate_ergo is not None:
                             print(f"🚴 ERGOMETRÍA encontrada por nombre: {candidate_ergo.name}")
                             pdfs.append(candidate_ergo)
-                            ergos_found = True
+                            ergos_found_by_name = True
                         else:
                             print(
-                                f"❌ ERGOMETRÍA por nombre no encontrada "
+                                f"ℹ️ ERGOMETRÍA por nombre no encontrada "
                                 f"(roots={search_roots}) para {apellido}, {nombre}"
                             )
 
+                    ergos_found = ergos_found_by_dni or ergos_found_by_name
                     if not ergos_found:
                         if not ergos_pdf and not list(ergos_dir.glob("*.pdf")) \
                                 and self._find_master_dir("ERGOS", "ERGO", "ERGOMETRIAS", "ERGOMETRIA") is None:
