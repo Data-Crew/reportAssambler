@@ -1,0 +1,56 @@
+# Archivos de datos (PDFs, imágenes, etc.)
+*.pdf
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.tif
+
+# Directorios de datos y salida
+DATA/
+OUTPUT/
+tmp/
+temp/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg-info/
+dist/
+build/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Scripts de build del host (no se necesitan dentro del contenedor)
+*.bat
+*.sh
+# start_app.sh sí se copia adentro de la imagen (CMD del Dockerfile), así
+# que lo re-incluimos explícitamente para evitar romper el build.
+!start_app.sh
+Dockerfile
+.dockerignore
+
+# Tests
+tests/
+.pytest_cache/
+.coverage
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
