@@ -30,9 +30,12 @@ build/
 .gitignore
 .gitattributes
 
-# Scripts de build (no se necesitan dentro del contenedor)
+# Scripts de build del host (no se necesitan dentro del contenedor)
 *.bat
 *.sh
+# start_app.sh sí se copia adentro de la imagen (CMD del Dockerfile), así
+# que lo re-incluimos explícitamente para evitar romper el build.
+!start_app.sh
 Dockerfile
 .dockerignore
 
